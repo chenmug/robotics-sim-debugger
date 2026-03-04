@@ -1,0 +1,16 @@
+# Build folders
+/build/
+/CMakeFiles/
+/CMakeCache.txt
+/Makefile
+/compile_commands.json
+/*.o
+/*.obj
+/*.exe
+
+# VS Code settings
+.vscode/
+
+# Mac / Linux system files
+.DS_Store
+*.swp
