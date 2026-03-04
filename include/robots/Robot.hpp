@@ -1,5 +1,5 @@
 #pragma once
-#include "SimulationState.hpp"
+#include "SimulationState.hpp"  // Forward Declaration
 
 /**
  * @brief Abstract base class for all robots in the simulation.

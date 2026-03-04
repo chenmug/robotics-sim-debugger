@@ -1,5 +1,5 @@
 #pragma once
-#include <vector>
+#include <vector>  // For std::vector
 
 /**
  * @brief Represents a 2D coordinate in the simulation grid.
