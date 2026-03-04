@@ -1,5 +1,7 @@
-# Build folders
+# Build folder
 /build/
+
+# CMake files
 /CMakeFiles/
 /CMakeCache.txt
 /Makefile
