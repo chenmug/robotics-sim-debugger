@@ -27,7 +27,7 @@ class SimulationEngine
 {
 private:
     SimulationState current_state;              // Current simulation state
-    GridConfig grid;                            // Grid configuration
+    GridConfig grid_;                            // Grid configuration
     std::vector<std::unique_ptr<Robot>> robots; // All robots in the simulation
 
 public:
@@ -41,13 +41,15 @@ public:
     SimulationEngine(const GridConfig& config);
 
     /**
-     * @brief Add a robot to the simulation.
+     * @brief Add a robot to the simulation at a specific starting position.
      * 
-     * Robots are stored internally and will be updated in every tick.
+     * This function registers the robot in the simulation engine, assigns it a unique ID,
+     * initializes its state in the SimulationState, and stores ownership of the Robot instance.
      * 
-     * @param robot Unique pointer to a Robot instance.
+     * @param robot Unique pointer to a Robot instance. The engine takes ownership of the robot.
+     * @param start_pos Initial position of the robot in the grid. This defines where the robot starts.
      */
-    void addRobot(std::unique_ptr<Robot> robot);
+    void addRobot(std::unique_ptr<Robot> robot, Position start_pos);
 
     /**
      * @brief Advance the simulation by one tick.

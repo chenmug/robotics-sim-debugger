@@ -4,7 +4,7 @@
 /**************** CONSTRUCTOR ****************/
 
 SimulationEngine::SimulationEngine(const GridConfig& config)
-    : grid(config) 
+    : grid_(config) 
 {
     current_state.tick = 0;
 }
@@ -12,8 +12,18 @@ SimulationEngine::SimulationEngine(const GridConfig& config)
 
 /***************** ADD ROBOT *****************/
 
-void SimulationEngine::addRobot(std::unique_ptr<Robot> robot)
+void SimulationEngine::addRobot(std::unique_ptr<Robot> robot, Position start_pos)
 {
+    size_t id = current_state.robots.size();
+    RobotState state;
+
+    state.id = id;
+    state.position = start_pos;
+    state.goal = start_pos;
+    state.path_index = 0;
+    state.planned_path.clear();
+
+    current_state.robots.push_back(state);
     robots.emplace_back(std::move(robot));
 }
 

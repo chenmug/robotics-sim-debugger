@@ -1,5 +1,6 @@
 #pragma once
-#include <vector>  // For std::vector
+#include <vector>   // For std::vector
+#include <cstddef>  // For size_t
 
 /**
  * @brief Represents a 2D coordinate in the simulation grid.
@@ -13,10 +14,12 @@ struct Position
 /**
  * @brief Represents the state of a single robot in the simulation.
  * 
- * Contains its current position, goal, planned path, and index in the path.
+ * Stores the robot's unique identifier, current position, goal, planned path, and the 
+ * index of the next step in that path.
  */
 struct RobotState 
 {
+    size_t id;                          // Unique robot identifier
     Position position;                  // Current position of the robot
     Position goal;                      // Target goal position
     std::vector<Position> planned_path; // Precomputed path (absolute coordinates)

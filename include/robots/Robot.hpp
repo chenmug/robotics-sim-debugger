@@ -1,4 +1,5 @@
 #pragma once
+#include <cstddef>              // For size_t
 #include "SimulationState.hpp"  // Forward Declaration
 
 /**
@@ -14,11 +15,24 @@
  */
 class Robot 
 {
+protected:
+    size_t id_;  // Unique robot identifier
+
 public:
+    /**
+     * @brief Set the unique identifier to the robot
+     *  
+     * Each robot in the simulation should have a distinct ID.  
+     * This ID can be used to track, log, or reference the robot during the simulation.
+     *
+     * @param id a unique robot identifier
+     */
+    void setID(size_t id) { id_ = id; }
+
     /**
      * @brief Sense the environment based on the current SimulationState.
      * 
-     * @param state The current simulation state (read-only).
+     * @param state The current simulation state.
      *              The robot can use this information to update its internal sensors or perception.
      */
     virtual void sense(const SimulationState& state) = 0;
@@ -26,7 +40,7 @@ public:
     /**
      * @brief Compute the robot's next moves or path.
      * 
-     * @param state The current simulation state (read-write).
+     * @param state The current simulation state.
      *              The robot examines the environment to decide its next actions:
      *                - Detect obstacles.
      *                - Check positions of other robots.
@@ -38,7 +52,7 @@ public:
     /**
      * @brief Execute the planned actions on the simulation state.
      * 
-     * @param state The current simulation state (read-write).
+     * @param state The current simulation state.
      *              The robot applies the plan computed in plan():
      *                - Updates its position.
      *                - Updates internal state if needed.
