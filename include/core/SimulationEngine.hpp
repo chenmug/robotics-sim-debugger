@@ -27,7 +27,7 @@ class SimulationEngine
 {
 private:
     SimulationState current_state;              // Current simulation state
-    GridConfig grid;                           // Grid configuration
+    GridConfig grid;                            // Grid configuration
     std::vector<std::unique_ptr<Robot>> robots; // All robots in the simulation
 
 public:
@@ -52,7 +52,7 @@ public:
     /**
      * @brief Advance the simulation by one tick.
      * 
-     * Executes all robots in order: sense → plan → act.
+     * Executes all robots in order: sense -> plan -> act.
      * Updates the internal SimulationState accordingly.
      */
     void runTick();
