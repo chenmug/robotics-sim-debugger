@@ -1,11 +1,10 @@
-#include "GridRobot.hpp"
-#include "SimulationEngine.hpp"
+#include "robots/GridRobot.hpp"
 
 
 /**************** CONSTRUCTOR ****************/
 
-GridRobot::GridRobot(size_t id, Position startPos, Position goalPos)
-    : currentPos_(startPos), goal_(goalPos)
+GridRobot::GridRobot(size_t id, Position startPos, Position goalPos, int gridWidth, int gridHeight)
+    : currentPos_(startPos), goal_(goalPos), gridWidth_(gridWidth), gridHeight_(gridHeight)
 {
     setID(id);
 }
@@ -45,7 +44,7 @@ bool GridRobot::isFree(Position pos, const SimulationState& state) const
     // Check if any robot occupies the position
     for (const auto& robot : state.robots)
     {
-        if (robot.position == pos)
+        if (robot.id != id_ && robot.position == pos)
         {
             return false;
         }
@@ -94,35 +93,41 @@ Position GridRobot::computeNextStep(const SimulationState& state) const
     Position nextPos = currentPos_;
 
     // Try moving in X direction first
-    if (currentPos_.x < goal_.x)
+    if (currentPos_.x != goal_.x)
     {
-        nextPos.x += 1; 
-    }
-    else if (currentPos_.x > goal_.x)
-    {
-        nextPos.x -= 1;
-    }
-    
-    if (isBounds(nextPos) && isFree(nextPos, state))
-    {
-        return nextPos;
+        if (currentPos_.x < goal_.x)
+        {
+            nextPos.x += 1;
+        }
+        else
+        {
+            nextPos.x -= 1;
+        }
+        
+        if (isBounds(nextPos) && isFree(nextPos, state))
+        {
+            return nextPos;
+        }
     }
 
     // If blocked or already aligned, try Y direction
     nextPos = currentPos_; 
 
-    if (currentPos_.y < goal_.y)
+    if (currentPos_.y != goal_.y)
     {
-        nextPos.y += 1;
-    }
-    else if (currentPos_.y > goal_.y)
-    {
-        nextPos.y -= 1;
-    }
+        if (currentPos_.y < goal_.y)
+        {
+            nextPos.y += 1;
+        }
+        else
+        {
+            nextPos.y -= 1;
+        }
 
-    if (isBounds(nextPos) && isFree(nextPos, state))
-    {
-        return nextPos;
+        if (isBounds(nextPos) && isFree(nextPos, state))
+        {
+            return nextPos;
+        }
     }
 
     // If neither move is possible, stay in place

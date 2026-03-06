@@ -1,6 +1,6 @@
 #pragma once
-#include "SimulationState.hpp" // Forward Declaration
-#include "Robot.hpp"           // Forward Declaration
+#include "core/SimulationState.hpp" // Forward Declaration
+#include "robots/Robot.hpp"           // Forward Declaration
 #include <vector>              // For std::vector
 #include <memory>              // For std::unique_ptr
 

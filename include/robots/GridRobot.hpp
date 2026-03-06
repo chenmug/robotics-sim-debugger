@@ -1,5 +1,5 @@
 #pragma once
-#include "Robot.hpp"  // Forward Declaration
+#include "robots/Robot.hpp"  // Forward Declaration
 
 /**
  * @brief A simple robot that navigates on a 2D grid towards a goal.
@@ -23,8 +23,10 @@ public:
      * @param id Unique identifier for this robot.
      * @param startPos Starting position on the grid.
      * @param goalPos Goal position the robot should reach.
+     * @param gridWidth The grid width.
+     * @param gridHeight The grid height.
      */
-    GridRobot(size_t id, Position startPos, Position goalPos);
+    GridRobot(size_t id, Position startPos, Position goalPos, int gridWidth, int gridHeight);
 
     /**
      * @brief Sense the environment (MVP: no sensing yet).

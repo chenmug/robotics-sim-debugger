@@ -1,6 +1,6 @@
 #pragma once
-#include <cstddef>              // For size_t
-#include "SimulationState.hpp"  // Forward Declaration
+#include "core/SimulationState.hpp"  // Forward Declaration
+#include <cstddef>                   // For size_t
 
 /**
  * @brief Abstract base class for all robots in the simulation.
