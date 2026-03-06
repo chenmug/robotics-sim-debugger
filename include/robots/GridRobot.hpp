@@ -12,7 +12,10 @@ class GridRobot : public Robot
 {
 private:
     Position currentPos_; // Current position of the robot.
+    Position nextPos_;    // The next position the robot plans to move to.
     Position goal_;       // Target goal position.
+    int gridWidth_;       // The grid width.
+    int gridHeight_;      // The grid height.
 
 public:
     /**
@@ -67,10 +70,11 @@ public:
 
     /**
      * @brief Compute the next step of the robot based on X-first/Y-second strategy.
+     * @param state The current simulation state.
      * 
      * @return The next position the robot will attempt to move to.
      */
-    Position computeNextStep() const;
+    Position computeNextStep(const SimulationState& state) const;
 
     /**
      * @brief Check if the robot has reached its goal.
