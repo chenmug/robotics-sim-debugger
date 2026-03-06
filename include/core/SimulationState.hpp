@@ -9,6 +9,17 @@ struct Position
 {
     int x; // X coordinate (column)
     int y; // Y coordinate (row)
+
+    // Equality comparison for positions
+    bool operator==(const Position& other) const
+    {
+        return x == other.x && y == other.y;
+    }
+
+    bool operator!=(const Position& other) const
+    {
+        return !(*this == other);
+    }
 };
 
 /**
