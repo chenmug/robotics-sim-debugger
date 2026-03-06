@@ -12,7 +12,7 @@ SimulationEngine::SimulationEngine(const GridConfig& config)
 
 /***************** ADD ROBOT *****************/
 
-void SimulationEngine::addRobot(std::unique_ptr<Robot> robot, Position start_pos)
+void SimulationEngine::addRobot(std::unique_ptr<Robot> robot, Position start_pos, Position goal_pos)
 {
     size_t id = current_state.robots.size();
     robot->setID(id);  // Assign unique ID to the robot before adding to engine
@@ -20,7 +20,7 @@ void SimulationEngine::addRobot(std::unique_ptr<Robot> robot, Position start_pos
 
     state.id = id;
     state.position = start_pos;
-    state.goal = start_pos;
+    state.goal = goal_pos;
     state.path_index = 0;
     state.planned_path.clear();
 
@@ -57,4 +57,12 @@ void SimulationEngine::runTick()
 const SimulationState& SimulationEngine::getCurrentState() const
 {
     return current_state;
+}
+
+
+/************** GET GRID CONFIG *************/
+
+const GridConfig& SimulationEngine::getGridConfig() const
+{
+    return grid_;
 }

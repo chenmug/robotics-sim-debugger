@@ -1,8 +1,8 @@
 #pragma once
 #include "core/SimulationState.hpp" // Forward Declaration
-#include "robots/Robot.hpp"           // Forward Declaration
-#include <vector>              // For std::vector
-#include <memory>              // For std::unique_ptr
+#include "robots/Robot.hpp"         // Forward Declaration
+#include <vector>                   // For std::vector
+#include <memory>                   // For std::unique_ptr
 
 /**
  * @brief Configuration for the simulation grid.
@@ -26,9 +26,9 @@ struct GridConfig
 class SimulationEngine 
 {
 private:
-    SimulationState current_state;              // Current simulation state
+    SimulationState current_state;               // Current simulation state
     GridConfig grid_;                            // Grid configuration
-    std::vector<std::unique_ptr<Robot>> robots; // All robots in the simulation
+    std::vector<std::unique_ptr<Robot>> robots;  // All robots in the simulation
 
 public:
     /**
@@ -48,8 +48,9 @@ public:
      * 
      * @param robot Unique pointer to a Robot instance. The engine takes ownership of the robot.
      * @param start_pos Initial position of the robot in the grid. This defines where the robot starts.
+     * @param start_pos End position of the robot in the grid. This defines where the goal is.
      */
-    void addRobot(std::unique_ptr<Robot> robot, Position start_pos);
+    void addRobot(std::unique_ptr<Robot> robot, Position start_pos, Position goal_pos);
 
     /**
      * @brief Advance the simulation by one tick.
@@ -68,4 +69,14 @@ public:
      * @return Current simulation state
      */
     const SimulationState& getCurrentState() const;
+
+    /**
+     * @brief Access the grid configuration.
+     * 
+     * Provides read-only access to the grid configuration used by the simulation.
+     * Useful for rendering and debugging.
+     * 
+     * @return Grid configuration
+     */
+    const GridConfig& getGridConfig() const;
 };
