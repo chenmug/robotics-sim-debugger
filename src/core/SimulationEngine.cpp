@@ -15,6 +15,7 @@ SimulationEngine::SimulationEngine(const GridConfig& config)
 void SimulationEngine::addRobot(std::unique_ptr<Robot> robot, Position start_pos)
 {
     size_t id = current_state.robots.size();
+    robot->setID(id);  // Assign unique ID to the robot before adding to engine
     RobotState state;
 
     state.id = id;
