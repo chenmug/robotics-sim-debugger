@@ -3,11 +3,8 @@
 
 /**************** CONSTRUCTOR ****************/
 
-GridRobot::GridRobot(size_t id, Position startPos, Position goalPos, int gridWidth, int gridHeight)
-    : currentPos_(startPos), goal_(goalPos), gridWidth_(gridWidth), gridHeight_(gridHeight)
-{
-    setID(id);
-}
+GridRobot::GridRobot(int gridWidth, int gridHeight)
+    : gridWidth_(gridWidth), gridHeight_(gridHeight){}
 
 
 /******************* SENSE *******************/
@@ -22,7 +19,7 @@ void GridRobot::sense(const SimulationState& state)
 
 void GridRobot::plan(SimulationState& state)
 {
-    nextPos_ = computeNextStep(state);
+    Position nextPos = computeNextStep(state);
 }
 
 
@@ -30,9 +27,11 @@ void GridRobot::plan(SimulationState& state)
 
 void GridRobot::act(SimulationState& state)
 {
-    if (isBounds(nextPos_) && isFree(nextPos_, state))
+    Position nextPos = computeNextStep(state);
+
+    if (isBounds(nextPos) && isFree(nextPos, state))
     {
-        update(nextPos_, state);
+        update(nextPos, state);
     }
 }
 
@@ -75,14 +74,13 @@ bool GridRobot::isBounds(Position pos) const
 
 void GridRobot::update(Position newPos, SimulationState& state)
 {
-    state.robots[id_].position = newPos;
+    RobotState& self = state.robots[id_];
 
-    if (currentPos_ != newPos)
+    if (self.position != newPos)
     {
-        state.robots[id_].path_index++;
+        self.position = newPos;
+        self.path_index++;
     }
-
-    currentPos_ = newPos;
 }
 
 
@@ -90,12 +88,13 @@ void GridRobot::update(Position newPos, SimulationState& state)
 
 Position GridRobot::computeNextStep(const SimulationState& state) const
 {
-    Position nextPos = currentPos_;
+    const RobotState& self = state.robots[id_];
+    Position nextPos = self.position;
 
     // Try moving in X direction first
-    if (currentPos_.x != goal_.x)
+    if (self.position.x != self.goal.x)
     {
-        if (currentPos_.x < goal_.x)
+        if (self.position.x < self.goal.x)
         {
             nextPos.x += 1;
         }
@@ -111,11 +110,11 @@ Position GridRobot::computeNextStep(const SimulationState& state) const
     }
 
     // If blocked or already aligned, try Y direction
-    nextPos = currentPos_; 
+    nextPos = self.position; 
 
-    if (currentPos_.y != goal_.y)
+    if (self.position.y != self.goal.y)
     {
-        if (currentPos_.y < goal_.y)
+        if (self.position.y < self.goal.y)
         {
             nextPos.y += 1;
         }
@@ -131,13 +130,15 @@ Position GridRobot::computeNextStep(const SimulationState& state) const
     }
 
     // If neither move is possible, stay in place
-    return currentPos_;
+    return self.position;
 }
 
 
 /************* HAS REACHED GOAL *************/
 
-bool GridRobot::hasReachedGoal() const
+bool GridRobot::hasReachedGoal(const SimulationState& state) const
 {
-    return goal_ == currentPos_;
+    const RobotState& self = state.robots[id_];
+
+    return self.position == self.goal;
 }

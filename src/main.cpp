@@ -9,6 +9,7 @@
 void printGrid(const SimulationState& state, const GridConfig& grid)
 {
     std::system("clear"); 
+    std::cout << "Robotics Simulation Debugger - Console MVP\n";
 
     std::cout << "Tick: " << state.tick << "\n\n";
     
@@ -94,22 +95,24 @@ void printGrid(const SimulationState& state, const GridConfig& grid)
 
 int main()
 {
-     std::cout << "Robotics Simulation Debugger - Console MVP\n";
-
-    GridConfig grid{5, 5, {{2,2}, {3,1}}};
+    GridConfig grid{10, 10, {{2,2}, {5,5}}};
     SimulationEngine engine(grid);
 
-    auto robot1 = std::make_unique<GridRobot>(1, Position{0,0}, Position{4,4}, 5, 5);
-    engine.addRobot(std::move(robot1), {0,0}, {4,4});
+    auto robot1 = std::make_unique<GridRobot>(grid.width, grid.height);
+    auto robot2 = std::make_unique<GridRobot>(grid.width, grid.height);
+
+    engine.addRobot(std::move(robot1), {0,0}, {9,9});
+    engine.addRobot(std::move(robot2), {0,4}, {4,0});
 
     printGrid(engine.getCurrentState(), grid);
 
-    while (engine.getCurrentState().robots[0].position != engine.getCurrentState().robots[0].goal)
+    while (!engine.allRobotsReached())
     {
         engine.runTick();
         printGrid(engine.getCurrentState(), grid);
+
         std::this_thread::sleep_for(std::chrono::milliseconds(500)); 
     }
 
-    std::cout << "Robot reached goal!\n";
+    std::cout << "All robots reached their goals!\n";
 }

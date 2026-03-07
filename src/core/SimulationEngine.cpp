@@ -14,10 +14,10 @@ SimulationEngine::SimulationEngine(const GridConfig& config)
 
 void SimulationEngine::addRobot(std::unique_ptr<Robot> robot, Position start_pos, Position goal_pos)
 {
-    size_t id = current_state.robots.size();
+    const size_t id = current_state.robots.size();
     robot->setID(id);  // Assign unique ID to the robot before adding to engine
+    
     RobotState state;
-
     state.id = id;
     state.position = start_pos;
     state.goal = goal_pos;
@@ -65,4 +65,20 @@ const SimulationState& SimulationEngine::getCurrentState() const
 const GridConfig& SimulationEngine::getGridConfig() const
 {
     return grid_;
+}
+
+
+/************ ALL ROBOTS REACHED ************/
+
+bool SimulationEngine::allRobotsReached() const
+{
+    for (const auto& robot : current_state.robots)
+    {
+        if (robot.position != robot.goal)
+        {
+            return false;
+        }
+    }
+
+    return true;
 }

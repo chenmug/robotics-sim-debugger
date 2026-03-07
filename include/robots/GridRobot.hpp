@@ -11,22 +11,16 @@
 class GridRobot : public Robot
 {
 private:
-    Position currentPos_; // Current position of the robot.
-    Position nextPos_;    // The next position the robot plans to move to.
-    Position goal_;       // Target goal position.
-    int gridWidth_;       // The grid width.
-    int gridHeight_;      // The grid height.
+    int gridWidth_;    // The grid width.
+    int gridHeight_;   // The grid height.
 
 public:
     /**
      * @brief Construct a GridRobot with a unique ID and initial position.
-     * @param id Unique identifier for this robot.
-     * @param startPos Starting position on the grid.
-     * @param goalPos Goal position the robot should reach.
      * @param gridWidth The grid width.
      * @param gridHeight The grid height.
      */
-    GridRobot(size_t id, Position startPos, Position goalPos, int gridWidth, int gridHeight);
+    GridRobot(int gridWidth, int gridHeight);
 
     /**
      * @brief Sense the environment (MVP: no sensing yet).
@@ -80,8 +74,9 @@ public:
 
     /**
      * @brief Check if the robot has reached its goal.
+     * @param state The current simulation state.
      * 
      * @return True if the current position equals the goal, false otherwise.
      */
-    bool hasReachedGoal() const;
+    bool hasReachedGoal(const SimulationState& state) const;
 };

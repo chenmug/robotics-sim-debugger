@@ -47,8 +47,8 @@ public:
      * initializes its state in the SimulationState, and stores ownership of the Robot instance.
      * 
      * @param robot Unique pointer to a Robot instance. The engine takes ownership of the robot.
-     * @param start_pos Initial position of the robot in the grid. This defines where the robot starts.
-     * @param start_pos End position of the robot in the grid. This defines where the goal is.
+     * @param start_pos Initial position of the robot in the grid. 
+     * @param goal_pos End position of the robot in the grid. 
      */
     void addRobot(std::unique_ptr<Robot> robot, Position start_pos, Position goal_pos);
 
@@ -79,4 +79,11 @@ public:
      * @return Grid configuration
      */
     const GridConfig& getGridConfig() const;
+
+    /**
+     * @brief Checks if all robots reached their goals.
+     * 
+     * @return True if all robots reached their goals, false otherwise.
+     */
+    bool allRobotsReached() const;
 };
