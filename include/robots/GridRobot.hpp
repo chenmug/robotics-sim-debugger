@@ -7,8 +7,9 @@
  * @brief A simple robot that navigates on a 2D grid towards a goal.
  * 
  * Implements the Robot interface for the MVP simulation:
- * - Moves one step per tick in X-first, then Y direction.
- * - Checks grid boundaries and collisions with obstacles.
+ * - Computes next step per tick using the assigned Planner.
+ * - Planner handles pathfinding, collision avoidance, and grid boundaries.
+ * - GridRobot caches its current position, goal, and next step for efficiency.
  */
 class GridRobot : public Robot
 {
@@ -41,13 +42,21 @@ public:
     void sense(const SimulationState& state) override;
 
     /**
-     * @brief Plan the next action (computes next step).
+     * @brief Plan the next action for the robot.
+     *
+     * Computes the next step along the path using the assigned Planner.
+     * Takes into account dynamic and static obstacles and other robots in the current state.
+     *
      * @param state The current simulation state.
      */
     void plan(SimulationState& state) override;
 
     /**
-     * @brief Act on the simulation state (updates position if possible).
+     * @brief Execute the planned action on the simulation state.
+     *
+     * Moves the robot to `nextPos_` if possible. If `nextPos_` is blocked, the robot
+     * attempts to select an alternative step from the planned path.
+     *
      * @param state The current simulation state.
      */
     void act(SimulationState& state) override;
