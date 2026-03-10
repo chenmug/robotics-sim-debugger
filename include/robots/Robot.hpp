@@ -23,11 +23,19 @@ public:
      * @brief Set the unique identifier to the robot
      *  
      * Each robot in the simulation should have a distinct ID.  
-     * This ID can be used to track, log, or reference the robot during the simulation.
      *
      * @param id a unique robot identifier
      */
     void setID(size_t id) { id_ = id; }
+
+    /**
+     * @brief Get the unique identifier of the robot.
+     * 
+     * This ID uniquely identifies the robot within the simulation.
+     * 
+     * @return size_t The robot's unique ID
+     */
+    size_t getID() const { return id_; }
 
     /**
      * @brief Sense the environment based on the current SimulationState.
