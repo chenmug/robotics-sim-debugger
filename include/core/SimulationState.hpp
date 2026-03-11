@@ -4,18 +4,29 @@
 
 /**
  * @brief Represents a 2D coordinate in the simulation grid.
+ *
+ * The grid uses integer coordinates where:
+ * - x represents the column
+ * - y represents the row
  */
 struct Position 
 {
     int x; // X coordinate (column)
     int y; // Y coordinate (row)
 
-    // Equality comparison for positions
+    // // Default constructor
+    // Position() = default;
+
+    // // Constructs a position with given coordinates
+    // Position(int x_, int y_) : x(x_), y(y_) {}
+
+    // Equality comparison for positions.
     bool operator==(const Position& other) const
     {
         return x == other.x && y == other.y;
     }
 
+    // Inequality comparison between two positions.
     bool operator!=(const Position& other) const
     {
         return !(*this == other);
@@ -24,9 +35,19 @@ struct Position
 
 /**
  * @brief Represents the state of a single robot in the simulation.
- * 
- * Stores the robot's unique identifier, current position, goal, planned path, and the 
- * index of the next step in that path.
+ *
+ * RobotState is a plain data structure describing the dynamic state
+ * of a robot at a specific simulation tick.
+ *
+ * It stores:
+ * - the robot's unique identifier
+ * - its current position
+ * - its navigation goal
+ * - the planned path produced by a planner
+ * - the index of the next step along that path
+ *
+ * The simulation engine updates this structure each tick as the robot
+ * moves through the environment.
  */
 struct RobotState 
 {
@@ -38,9 +59,17 @@ struct RobotState
 };
 
 /**
- * @brief Represents the full state of the simulation at a given tick.
- * 
- * Includes the tick counter, all robots' states, and dynamic obstacles in the grid.
+ * @brief Represents the complete state of the simulation at a given tick.
+ *
+ * SimulationState captures all dynamic information required to describe
+ * the world at a specific point in time. It is designed to be easily
+ * copied and stored by the SnapshotManager to enable time-travel
+ * debugging (rewind / step-back functionality).
+ *
+ * The state includes:
+ * - the current simulation tick
+ * - the state of all robots
+ * - positions of dynamic obstacles
  */
 struct SimulationState 
 {
