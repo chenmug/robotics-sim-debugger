@@ -17,6 +17,7 @@ void SimulationEngine::addRobot(std::unique_ptr<Robot> robot, Position start_pos
     const size_t id = current_state.robots.size();
     robot->setID(id);  // Assign unique ID to the robot before adding to engine
     
+    // Initialize robot state
     RobotState state;
     state.id = id;
     state.position = start_pos;
@@ -24,6 +25,7 @@ void SimulationEngine::addRobot(std::unique_ptr<Robot> robot, Position start_pos
     state.path_index = 0;
     state.planned_path.clear();
 
+    // Add to engine
     current_state.robots.push_back(state);
     robots.emplace_back(std::move(robot));
 }
@@ -81,4 +83,12 @@ bool SimulationEngine::allRobotsReached() const
     }
 
     return true;
+}
+
+
+/************* GET ROBOT COUNT *************/
+
+size_t SimulationEngine::getRobotCount() const
+{
+    return robots.size();
 }

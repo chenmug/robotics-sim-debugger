@@ -86,4 +86,13 @@ public:
      * @return True if all robots reached their goals, false otherwise.
      */
     bool allRobotsReached() const;
+
+    /**
+     * @brief Get the number of robots currently registered in the simulation.
+     * 
+     * This function does not modify the engine or the simulation state.
+     * 
+     * @return Number of robots in the simulation.
+     */
+    size_t getRobotCount() const;
 };
