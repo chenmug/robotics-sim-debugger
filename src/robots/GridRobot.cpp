@@ -1,25 +1,60 @@
 #include "robots/GridRobot.hpp"
+#include "planners/Planner.hpp"
+
+#define UNUSED(x) (void)x
 
 
 /**************** CONSTRUCTOR ****************/
 
-GridRobot::GridRobot(int gridWidth, int gridHeight)
-    : gridWidth_(gridWidth), gridHeight_(gridHeight){}
+GridRobot::GridRobot(const GridConfig& grid, std::shared_ptr<Planner> planner)
+    : grid_(grid), planner_(planner)
+{}
+
+
+/**************** SYNC CACHE ****************/
+
+void GridRobot::syncWithState(const SimulationState& state)
+{
+    const RobotState& self = state.robots[id_];
+    currentPos_ = self.position;
+    goal_ = self.goal;
+}
 
 
 /******************* SENSE *******************/
 
 void GridRobot::sense(const SimulationState& state)
 {
-    // MVP: no sensing yet
+    // MVP: no sensing logic yet
+    syncWithState(state);
 }
 
 
 /******************* PLAN ********************/
 
-void GridRobot::plan(SimulationState& state)
+void GridRobot::plan(const SimulationState& state)
 {
-    Position nextPos = computeNextStep(state);
+     // Sync robot cache with current simulation state
+    syncWithState(state);
+    const RobotState& self = state.robots[id_];
+
+    // Compute new path if planner exists and path is empty or finished
+    if (planner_ && (planned_path_cache_.empty() || path_index_cache_ >= planned_path_cache_.size()))
+    {
+        planned_path_cache_ = planner_->computePath(state, self, grid_);
+        path_index_cache_ = 0;
+    }
+
+    // Set next step from the planned path
+    if (!planned_path_cache_.empty() && path_index_cache_ < planned_path_cache_.size())
+    {
+        nextPos_ = planned_path_cache_[path_index_cache_];
+    } 
+    else
+    {
+        // Fallback: stay in place if no path
+        nextPos_ = currentPos_;
+    }
 }
 
 
@@ -27,110 +62,24 @@ void GridRobot::plan(SimulationState& state)
 
 void GridRobot::act(SimulationState& state)
 {
-    Position nextPos = computeNextStep(state);
-
-    if (isBounds(nextPos) && isFree(nextPos, state))
-    {
-        update(nextPos, state);
-    }
-}
-
-
-/****************** IS FREE ******************/
-
-bool GridRobot::isFree(Position pos, const SimulationState& state) const
-{
-    // Check if any robot occupies the position
-    for (const auto& robot : state.robots)
-    {
-        if (robot.id != id_ && robot.position == pos)
-        {
-            return false;
-        }
-    }
-
-    // Check if any dynamic obstacle occupies the position
-    for (const auto& obst : state.dynamic_obstacles)
-    {
-        if (obst == pos)
-        {
-            return false;
-        }
-    }
-
-    return true;
-}
-
-
-/***************** IS BOUNDS *****************/
-
-bool GridRobot::isBounds(Position pos) const
-{
-    return pos.x >= 0 && pos.x < gridWidth_ && pos.y >= 0 && pos.y < gridHeight_;
-}
-
-
-/****************** UPDATE ******************/
-
-void GridRobot::update(Position newPos, SimulationState& state)
-{
     RobotState& self = state.robots[id_];
 
-    if (self.position != newPos)
+    if (path_index_cache_ < planned_path_cache_.size())
     {
-        self.position = newPos;
-        self.path_index++;
-    }
-}
+        currentPos_ = planned_path_cache_[path_index_cache_];
+        self.position = currentPos_;
+        ++path_index_cache_;
+        self.path_index = path_index_cache_;
 
-
-/************* COMPUTE NEXT STEP *************/
-
-Position GridRobot::computeNextStep(const SimulationState& state) const
-{
-    const RobotState& self = state.robots[id_];
-    Position nextPos = self.position;
-
-    // Try moving in X direction first
-    if (self.position.x != self.goal.x)
-    {
-        if (self.position.x < self.goal.x)
+        if (path_index_cache_ < planned_path_cache_.size())
         {
-            nextPos.x += 1;
+            nextPos_ = planned_path_cache_[path_index_cache_];
         }
         else
         {
-            nextPos.x -= 1;
-        }
-        
-        if (isBounds(nextPos) && isFree(nextPos, state))
-        {
-            return nextPos;
+            nextPos_ = currentPos_;
         }
     }
-
-    // If blocked or already aligned, try Y direction
-    nextPos = self.position; 
-
-    if (self.position.y != self.goal.y)
-    {
-        if (self.position.y < self.goal.y)
-        {
-            nextPos.y += 1;
-        }
-        else
-        {
-            nextPos.y -= 1;
-        }
-
-        if (isBounds(nextPos) && isFree(nextPos, state))
-        {
-            return nextPos;
-        }
-    }
-
-    // If neither move is possible, stay in place
-    return self.position;
 }
 
 
@@ -141,4 +90,56 @@ bool GridRobot::hasReachedGoal(const SimulationState& state) const
     const RobotState& self = state.robots[id_];
 
     return self.position == self.goal;
+}
+
+
+/*************** SET PLANNER ***************/
+
+void GridRobot::setPlanner(std::shared_ptr<Planner> planner)
+{
+    planner_ = planner;
+}
+
+
+/*************** GET PLANNER ***************/
+
+std::shared_ptr<Planner> GridRobot::getPlanner() const
+{
+    return planner_;
+}
+
+
+/**************** SET PATH *****************/
+
+void GridRobot::setPath(const std::vector<Position>& path, SimulationState& state)
+{
+    planned_path_cache_ = path;
+    path_index_cache_ = 0;
+    
+    RobotState& self = state.robots[id_];
+    self.planned_path = path;
+    self.path_index = 0;
+
+    // Update nextPos_ if path not empty
+    nextPos_ = !planned_path_cache_.empty() ? planned_path_cache_[0] : currentPos_;
+}
+
+
+/**************** GET PATH *****************/
+
+const std::vector<Position>& GridRobot::getPath(const SimulationState& state) const
+{
+    UNUSED(state);
+
+    return planned_path_cache_;
+}
+
+
+/************** GET PATH INDEX *************/
+
+size_t GridRobot::getPathIndex(const SimulationState& state) const
+{
+    UNUSED(state);
+    
+    return path_index_cache_;
 }
