@@ -14,11 +14,11 @@ struct Position
     int x; // X coordinate (column)
     int y; // Y coordinate (row)
 
-    // // Default constructor
-    // Position() = default;
+    // Default constructor
+    Position() = default;
 
-    // // Constructs a position with given coordinates
-    // Position(int x_, int y_) : x(x_), y(y_) {}
+    // Constructs a position with given coordinates
+    Position(int x_, int y_) : x(x_), y(y_) {}
 
     // Equality comparison for positions.
     bool operator==(const Position& other) const
