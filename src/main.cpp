@@ -2,6 +2,7 @@
 #include "robots/GridRobot.hpp"
 #include "planners/AStarPlanner.hpp"
 #include "planners/DijkstraPlanner.hpp"
+#include "planners/BFSPlanner.hpp"
 #include <thread>
 #include <chrono>
 #include <iostream>
@@ -90,7 +91,7 @@ int main()
     // Planners
     auto planner1 = std::make_shared<AStarPlanner>();
     auto planner2 = std::make_shared<DijkstraPlanner>();
-    auto planner3 = std::make_shared<AStarPlanner>();
+    auto planner3 = std::make_shared<BFSPlanner>();
 
     // Robots
     auto robot1 = std::make_unique<GridRobot>(grid, planner1);

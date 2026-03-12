@@ -10,13 +10,17 @@ std::vector<Position> GraphSearchPlanner::computePath(const SimulationState& sta
     const Position start = robot.position;
     const Position goal  = robot.goal;
 
+    // Open set (priority queue) ordered by fScore (g + h)
     std::priority_queue<PQElement, std::vector<PQElement>, std::greater<PQElement>> openSet;
     std::unordered_map<size_t, int> gScore;
     std::unordered_map<size_t, Position> cameFrom;
 
+    // Initial fScore for the start node
     int fScore = 0;
     const size_t startHash = hashPos(start, grid);
     gScore[startHash] = 0;
+
+    // Add the start node to the open set with its fScore
     openSet.push({heuristic(start, goal), start});
 
     while (!openSet.empty())
@@ -24,32 +28,32 @@ std::vector<Position> GraphSearchPlanner::computePath(const SimulationState& sta
         PQElement current = openSet.top();
         openSet.pop();
 
+        // If we reached the goal, reconstruct and return the path
         if (current.pos == goal)
         {
             return reconstructPath(cameFrom, start, goal, grid);
         }
 
+        // Explore neighbors (4 directions)
         for (const auto& dir : directions_)
         {
             Position neighbor{current.pos.x + dir.x, current.pos.y + dir.y};
-
-            if (!isWithinBounds(neighbor, grid))
-            {
-                continue;
-            }
-
-            if (isBlocked(neighbor, state, grid, robot.id))
+            
+            // Skip neighbor if it's out of bounds or blocked
+            if (!isWithinBounds(neighbor, grid) || isBlocked(neighbor, state, grid, robot.id))
             {
                 continue;
             }
 
             const int newCost = gScore[hashPos(current.pos, grid)] + 1;
             const size_t neighborHash = hashPos(neighbor, grid);
-
+            
+            // If neighbor is not in gScore or we found a cheaper path
             if (!gScore.count(neighborHash) || newCost < gScore[neighborHash])
             {
                 cameFrom[neighborHash] = current.pos;
                 gScore[neighborHash] = newCost;
+                
                 fScore = newCost + heuristic(neighbor, goal);
                 openSet.push({fScore, neighbor});
             }
