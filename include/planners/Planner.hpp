@@ -1,6 +1,7 @@
 #pragma once
 #include "core/SimulationState.hpp"  // Forward Declaration
 #include <vector>                    // For std::vector
+#include <unordered_map>             // For std::unordered_map
 
 struct GridConfig;
 
@@ -12,6 +13,10 @@ struct GridConfig;
  */
 class Planner
 {
+protected:
+    // 4-directional move offsets: up, right, down, left
+    const std::vector<Position> directions_ = {{0,1}, {1,0}, {0,-1}, {-1,0}};
+
 public:
 
     /**
@@ -63,4 +68,33 @@ protected:
      * @return True if the position is in the grid boundaries, false otherwise.
      */
     bool isWithinBounds(const Position& pos, const GridConfig& grid) const;
+
+    /**
+     * @brief Hash a position to a unique non-negative integer.
+     * 
+     * Used to index positions in vectors/maps efficiently.
+     * 
+     * @param pos Position to hash.
+     * @param grid Grid configuration.
+     * @return Unique hash value.
+     */
+    size_t hashPos(const Position& pos, const GridConfig& grid) const;
+
+    /**
+     * @brief Reconstruct path from start to goal using cameFrom map
+     * 
+     * This function is used after the search algorithm (A* or Dijkstra) has completed. 
+     * 
+     * @param cameFrom A map where the key is the hashed position (size_t) and the value is the parent Position.
+     *                 Each entry indicates from which node we arrived at the key node.
+     * @param start The starting position of the robot.
+     * @param goal The goal position of the robot.
+     * @param grid The grid configuration.
+     * 
+     * @return A vector of positions representing the path from start to goal, including both start and goal. 
+     *         The path is ordered sequentially. returns an empty vector if the goal is unreachable
+     *         or missing in cameFrom.
+     */
+    std::vector<Position> reconstructPath(const std::unordered_map<size_t, Position>& cameFrom,
+        const Position& start, const Position& goal, const GridConfig& grid) const;
 };

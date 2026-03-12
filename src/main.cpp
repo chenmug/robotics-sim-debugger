@@ -1,6 +1,7 @@
 #include "core/SimulationEngine.hpp"
 #include "robots/GridRobot.hpp"
-#include "planners/UniversalPlanner.hpp"
+#include "planners/AStarPlanner.hpp"
+#include "planners/DijkstraPlanner.hpp"
 #include <thread>
 #include <chrono>
 #include <iostream>
@@ -87,9 +88,9 @@ int main()
     SimulationEngine engine(grid);
 
     // Planners
-    auto planner1 = std::make_shared<UniversalPlanner>(PlannerType::ASTAR);
-    auto planner2 = std::make_shared<UniversalPlanner>(PlannerType::DIJKSTRA);
-    auto planner3 = std::make_shared<UniversalPlanner>(PlannerType::ASTAR);
+    auto planner1 = std::make_shared<AStarPlanner>();
+    auto planner2 = std::make_shared<DijkstraPlanner>();
+    auto planner3 = std::make_shared<AStarPlanner>();
 
     // Robots
     auto robot1 = std::make_unique<GridRobot>(grid, planner1);

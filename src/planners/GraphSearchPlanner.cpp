@@ -1,61 +1,10 @@
-#include "planners/UniversalPlanner.hpp"
+#include "planners/GraphSearchPlanner.hpp"
 #include <queue>          // For priority_queue
-#include <cmath>          // For std::abs
-#include <algorithm>      // For std::reverse
-
-
-/*************** CONSTRUCTOR ***************/
-
-UniversalPlanner::UniversalPlanner(PlannerType type)
-    : plannerType_(type)
-{}
-
-
-/**************** HEURISTIC ****************/
-
-int UniversalPlanner::heuristic(const Position& a, const Position& b) const
-{
-    if (plannerType_ == PlannerType::DIJKSTRA)
-    {
-        return 0;
-    }
-
-    return std::abs(a.x - b.x) + std::abs(a.y - b.y); // Manhattan distance
-}
-
-
-/**************** HASH POS *****************/
-
-size_t UniversalPlanner::hashPos(const Position& pos, const GridConfig& grid) const
-{
-    return pos.y * grid.width + pos.x;
-}
-
-
-/************* RECONSTRUCT PATH ************/
-
-std::vector<Position> UniversalPlanner::reconstructPath(const std::unordered_map<size_t, 
-    Position>& cameFrom, const Position& start, const Position& goal, const GridConfig& grid) const
-{
-    std::vector<Position> path;
-    Position node = goal;
-
-    while (node != start)
-    {
-        path.push_back(node);
-        node = cameFrom.at(hashPos(node, grid));
-    }
-
-    path.push_back(start);
-    std::reverse(path.begin(), path.end());
-
-    return path;
-}
 
 
 /**************** COMPUTE PATH ****************/
 
-std::vector<Position> UniversalPlanner::computePath(const SimulationState& state,
+std::vector<Position> GraphSearchPlanner::computePath(const SimulationState& state,
     const RobotState& robot, const GridConfig& grid)
 {
     const Position start = robot.position;
