@@ -34,22 +34,28 @@ void GridRobot::sense(const SimulationState& state)
 
 void GridRobot::plan(const SimulationState& state)
 {
-     // Sync robot cache with current simulation state
+    // Sync robot cache with current simulation state
     syncWithState(state);
     const RobotState& self = state.robots[id_];
 
     // Compute new path if planner exists and path is empty or finished
-    if (planner_ && (planned_path_cache_.empty() || path_index_cache_ >= planned_path_cache_.size()))
+    if (planner_ && (planned_path_cache_.empty() || path_index_cache_ > planned_path_cache_.size()))
     {
         planned_path_cache_ = planner_->computePath(state, self, grid_);
         path_index_cache_ = 0;
     }
 
-    // Set next step from the planned path
+    // Update the path_index_cache to avoid getting stuck at the starting point
+    if (path_index_cache_ == 0 && !planned_path_cache_.empty())
+    {
+        ++path_index_cache_; 
+    }
+
+    // Set next position from the planned path
     if (!planned_path_cache_.empty() && path_index_cache_ < planned_path_cache_.size())
     {
-        nextPos_ = planned_path_cache_[path_index_cache_];
-    } 
+        nextPos_ = planned_path_cache_[path_index_cache_]; 
+    }
     else
     {
         // Fallback: stay in place if no path
@@ -70,15 +76,6 @@ void GridRobot::act(SimulationState& state)
         self.position = currentPos_;
         ++path_index_cache_;
         self.path_index = path_index_cache_;
-
-        if (path_index_cache_ < planned_path_cache_.size())
-        {
-            nextPos_ = planned_path_cache_[path_index_cache_];
-        }
-        else
-        {
-            nextPos_ = currentPos_;
-        }
     }
 }
 

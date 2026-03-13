@@ -35,6 +35,8 @@ void SimulationEngine::addRobot(std::unique_ptr<Robot> robot, Position start_pos
 
 void SimulationEngine::runTick()
 {
+    ++current_state.tick;
+    
     for (auto& robot : robots)
     {
         robot->sense(current_state);
@@ -50,7 +52,7 @@ void SimulationEngine::runTick()
         robot->act(current_state);
     }
 
-    ++current_state.tick;
+    snapshotManager_.save(current_state);
 }
 
 
@@ -91,4 +93,12 @@ bool SimulationEngine::allRobotsReached() const
 size_t SimulationEngine::getRobotCount() const
 {
     return robots.size();
+}
+
+
+/********** GET SNAPSHOT MANAGER ***********/
+
+SnapshotManager& SimulationEngine::getSnapshotManager() 
+{
+    return snapshotManager_;
 }

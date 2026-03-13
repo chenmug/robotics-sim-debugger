@@ -28,7 +28,7 @@ void printGrid(const SimulationState& state, const GridConfig& grid)
                 const auto& robot = state.robots[i];
                 if (robot.position == pos)
                 {
-                    std::cout << "R" << i+1 << " ";
+                    std::cout << "R" << i + 1 << " ";
                     printed = true;
                     break;
                 }
@@ -82,6 +82,7 @@ void printGrid(const SimulationState& state, const GridConfig& grid)
 
 
 
+
 int main()
 {
     // Grid configuration
@@ -103,16 +104,53 @@ int main()
     engine.addRobot(std::move(robot2), {0,4}, {4,0});
     engine.addRobot(std::move(robot3), {9,0}, {0,9});
 
-    // Main simulation loop
+    size_t currentTick = 0;
+    engine.getSnapshotManager().save(engine.getCurrentState());
+
     while (!engine.allRobotsReached())
     {
-        // Run one tick
-        engine.runTick();
-        printGrid(engine.getCurrentState(), grid);
+        // Fetch the current snapshot
+        const SimulationState* state = engine.getSnapshotManager().get(currentTick);
+        if (!state) 
+        {
+            break;
+        }
 
-        // Pause for visualization
-        std::this_thread::sleep_for(std::chrono::milliseconds(500));
+        printGrid(*state, grid);
+
+        // User input for time travel
+        std::cout << "Commands: [n]ext, [b]ack, [q]uit: ";
+        char cmd;
+        std::cin >> cmd;
+
+        if (cmd == 'q') break;
+        else if (cmd == 'n') 
+        {
+            if (currentTick + 1 >= engine.getSnapshotManager().getSize())
+            {
+                engine.runTick();  // Advance simulation only if at latest tick
+            }
+            if (currentTick + 1 < engine.getSnapshotManager().getSize())
+            {
+                ++currentTick;
+            }
+        }
+        else if (cmd == 'b') 
+        {
+            if (engine.getSnapshotManager().canStepBack(currentTick))
+            {
+                --currentTick;
+            }
+        }
+        else
+        {
+            std::cout << "Invalid command.\n";
+        }
+
+        // Slow down for visualization
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
     }
 
-    std::cout << "All robots reached their goals!\n";
+    printGrid(engine.getCurrentState(), grid);
+    std::cout << "Simulation ended.\n";
 }

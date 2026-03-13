@@ -1,8 +1,9 @@
 #pragma once
-#include "core/SimulationState.hpp" // Forward Declaration
-#include "robots/Robot.hpp"         // Forward Declaration
-#include <vector>                   // For std::vector
-#include <memory>                   // For std::unique_ptr
+#include "core/SimulationState.hpp"  // Forward Declaration
+#include "core/SnapshotManager.hpp"  // Forward Declaration
+#include "robots/Robot.hpp"          // Forward Declaration
+#include <vector>                    // For std::vector
+#include <memory>                    // For std::unique_ptr
 
 /**
  * @brief Configuration for the simulation grid.
@@ -29,6 +30,7 @@ private:
     SimulationState current_state;               // Current simulation state
     GridConfig grid_;                            // Grid configuration
     std::vector<std::unique_ptr<Robot>> robots;  // All robots in the simulation
+    SnapshotManager snapshotManager_;            // Stores snapshots for debugging / replay
 
 public:
     /**
@@ -95,4 +97,13 @@ public:
      * @return Number of robots in the simulation.
      */
     size_t getRobotCount() const;
+
+    /**
+     * @brief Access the internal SnapshotManager.
+     *
+     * Provides access to the snapshot history for replaying past states or debugging purposes.
+     *
+     * @return reference to SnapshotManager
+     */
+    SnapshotManager& getSnapshotManager();
 };
