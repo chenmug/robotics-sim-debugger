@@ -5,6 +5,9 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
+# enable debug flags
+set(CMAKE_BUILD_TYPE Debug)  
+
 # include directories
 include_directories(include)
 
