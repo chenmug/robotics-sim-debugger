@@ -1,4 +1,5 @@
 #include "core/SimulationEngine.hpp" 
+#include <stdexcept>  // For std::runtime_error
 
 
 /**************** CONSTRUCTOR ****************/
@@ -16,6 +17,11 @@ void SimulationEngine::addRobot(std::unique_ptr<Robot> robot, Position start_pos
 {
     const size_t id = current_state.robots.size();
     robot->setID(id);  // Assign unique ID to the robot before adding to engine
+
+    if (!isWithinBounds(start_pos) || !isWithinBounds(goal_pos))
+    {
+        throw std::runtime_error("Robot position outside grid bounds");
+    }
     
     // Initialize robot state
     RobotState state;
@@ -69,6 +75,14 @@ const SimulationState& SimulationEngine::getCurrentState() const
 const GridConfig& SimulationEngine::getGridConfig() const
 {
     return grid_;
+}
+
+
+/************* IS VALID POSITION ************/
+
+bool SimulationEngine::isWithinBounds(const Position& pos) const
+{
+    return pos.x >= 0 && pos.x < grid_.width && pos.y >= 0 && pos.y < grid_.height;
 }
 
 

@@ -83,6 +83,14 @@ public:
     const GridConfig& getGridConfig() const;
 
     /**
+     * @brief Check if a position is within the grid boundaries.
+     * @param pos The position to check.
+     *
+     * @return True if the position is in the grid boundaries, false otherwise.
+     */
+    bool isWithinBounds(const Position& pos) const;
+
+    /**
      * @brief Checks if all robots reached their goals.
      * 
      * @return True if all robots reached their goals, false otherwise.
