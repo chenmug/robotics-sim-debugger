@@ -45,6 +45,7 @@ struct Position
  * - its navigation goal
  * - the planned path produced by a planner
  * - the index of the next step along that path
+ * - its next planned position
  *
  * The simulation engine updates this structure each tick as the robot
  * moves through the environment.
@@ -56,6 +57,7 @@ struct RobotState
     Position goal;                      // Target goal position
     std::vector<Position> planned_path; // Precomputed path (absolute coordinates)
     size_t path_index = 0;              // Index of the next step in the planned path
+    Position nextPlannedPos;            // Next planned position of the robot
 };
 
 /**
