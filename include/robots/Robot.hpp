@@ -1,5 +1,6 @@
 #pragma once
 #include "core/SimulationState.hpp"  // Forward Declaration
+#include "sensors/Sensor.hpp"        // Forward Declaration
 #include <cstddef>                   // For size_t
 
 /**
@@ -12,12 +13,14 @@
  *   3. act() - apply the planned action to the simulation.
  *
  * The Robot does not own the SimulationState; it only reads from it or updates
- *  relevant parts of it during execution.
+ * relevant parts of it during execution.
  */
 class Robot
 {
 protected:
-    size_t id_ = 0;  // Unique robot identifier
+    size_t id_ = 0;                                 // Unique robot identifier
+    std::vector<std::shared_ptr<Sensor>> sensors_;  // List of sensors attached to this robot
+    std::vector<SensorData> sensorDataCache_;       // Cached readings from all sensors
 
 public:
     /**
@@ -39,6 +42,20 @@ public:
     size_t getID() const { return id_; }
 
     /**
+     * @brief Attach a new sensor to this robot.
+     *
+     * @param sensor Shared pointer to a sensor instance.
+     */
+    void addSensor(std::shared_ptr<Sensor> sensor) { sensors_.push_back(sensor); }
+
+    /**
+     * @brief Access the last cached sensor readings.
+     *
+     * @return const reference to vector of SensorData
+     */
+    const std::vector<SensorData>& getSensorDataCache() const { return sensorDataCache_; }
+
+    /**
      * @brief Observe the environment.
      *
      * @param state Current simulation state (read-only).
@@ -48,12 +65,16 @@ public:
     /**
      * @brief Plan the next actions.
      *
-     * This function computes the next steps based on the
-     * current world state but does not modify it.
+     * Computes the robot's next intended move based on the
+     * current simulation state.
      *
-     * @param state Current simulation state (read-only).
+     * The robot may update its own planned fields in the
+     * SimulationState (e.g., nextPlannedPos) to announce its
+     * intention and allow other robots to avoid collisions.
+     *
+     * @param state Current simulation state.
      */
-    virtual void plan(const SimulationState& state) = 0;
+    virtual void plan(SimulationState& state) = 0;
 
     /**
      * @brief Execute the planned action.

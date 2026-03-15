@@ -26,8 +26,8 @@ private:
     Position nextPos_{0,0};     // Next position to move to.  
     
     // Cache for planning
-    std::vector<Position> planned_path_cache_;
-    size_t path_index_cache_ = 0;
+    std::vector<Position> planned_path_cache_;  // Cached planned path for the robot.
+    size_t path_index_cache_ = 0;               // Cached index of the current position in the planned path.
 
     // Planner strategy
     std::shared_ptr<Planner> planner_;  // Planner strategy used by this robot.
@@ -47,7 +47,11 @@ public:
     GridRobot(const GridConfig& grid, std::shared_ptr<Planner> planner = nullptr);
 
     /**
-     * @brief Sense the environment (MVP: no sensing yet).
+     * @brief Sense the environment.
+     * 
+     * This method retrieves the latest sensor readings from all sensors attached to the robot,
+     * updates the `sensorDataCache_` with the data, and processes the information for further use.
+     * 
      * @param state The current simulation state.
      */
     void sense(const SimulationState& state) override;
@@ -59,9 +63,9 @@ public:
      * - Requests a new path from the Planner if the current path is empty or finished.
      * - Updates nextPos_ based on the planned path.
      * 
-     * @param state The current simulation state (read-only).
+     * @param state The current simulation state.
      */
-    void plan(const SimulationState& state) override;
+    void plan(SimulationState& state) override;
 
     /**
      * @brief Execute the planned move, updating the SimulationState.

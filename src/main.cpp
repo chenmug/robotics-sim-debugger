@@ -79,7 +79,7 @@ int main()
             break;
         
         default:
-            std::cout << "Invalid command!" << std::endl;
+            std::cout << "Invalid command!\n" << std::endl;
             break;
         }
     }

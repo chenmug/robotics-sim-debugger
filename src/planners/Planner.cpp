@@ -41,11 +41,13 @@ bool Planner::isBlocked(const Position& pos, const SimulationState& state,
             return true;
         }
 
-        // Robot next planned step (collision avoidance)
-        if (other.path_index < other.planned_path.size() &&
-            other.planned_path[other.path_index] == pos)
+        if (other.nextPlannedPos == pos)
         {
-            return true;
+            // Priority rule: lower ID wins
+            if (other.id < self_id)
+            {
+                return true;
+            }
         }
     }
 

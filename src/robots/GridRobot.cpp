@@ -1,5 +1,8 @@
 #include "robots/GridRobot.hpp"
 #include "planners/Planner.hpp"
+#include "sensors/Sensor.hpp"
+#include "sensors/ObstacleSensor.hpp"
+#include <iostream>
 
 #define UNUSED(x) (void)x
 
@@ -8,7 +11,11 @@
 
 GridRobot::GridRobot(const GridConfig& grid, std::shared_ptr<Planner> planner)
     : grid_(grid), planner_(planner)
-{}
+{
+    // Add an ObstacleSensor with a detection range of 5
+    auto obstacleSensor = std::make_shared<ObstacleSensor>(5);
+    addSensor(obstacleSensor);
+}
 
 
 /**************** SYNC CACHE ****************/
@@ -25,18 +32,37 @@ void GridRobot::syncWithState(const SimulationState& state)
 
 void GridRobot::sense(const SimulationState& state)
 {
-    // MVP: no sensing logic yet
     syncWithState(state);
+    sensorDataCache_.clear();  // Clear previous sensor readings
+
+    std::cout << "[Tick " << state.tick << "] Robot " << id_ << " sensing...\n";
+
+    for (auto& sensor : sensors_)
+    {
+        if (!sensor)
+        {
+            continue;
+        }
+
+        SensorData data = sensor->read(state, grid_, id_);
+        sensorDataCache_.push_back(data);
+
+        // TODO: for debugging - remove it later
+        std::cout << "  detects obstacles at: ";
+        for (const auto& pos : data.positions)
+            std::cout << "(" << pos.x << "," << pos.y << ") ";
+        std::cout << "\n";
+    }
 }
 
 
 /******************* PLAN ********************/
 
-void GridRobot::plan(const SimulationState& state)
+void GridRobot::plan(SimulationState& state)
 {
     // Sync robot cache with current simulation state
     syncWithState(state);
-    const RobotState& self = state.robots[id_];
+    RobotState& self = state.robots[id_];
 
     // Compute new path if planner exists and path is empty or finished
     if (planner_ && (planned_path_cache_.empty() || path_index_cache_ > planned_path_cache_.size()))
@@ -61,6 +87,9 @@ void GridRobot::plan(const SimulationState& state)
         // Fallback: stay in place if no path
         nextPos_ = currentPos_;
     }
+
+    // Updating the SimulationState with the next planned step
+    self.nextPlannedPos = nextPos_;
 }
 
 
@@ -70,10 +99,11 @@ void GridRobot::act(SimulationState& state)
 {
     RobotState& self = state.robots[id_];
 
+    currentPos_ = nextPos_;
+    self.position = currentPos_;
+
     if (path_index_cache_ < planned_path_cache_.size())
     {
-        currentPos_ = planned_path_cache_[path_index_cache_];
-        self.position = currentPos_;
         ++path_index_cache_;
         self.path_index = path_index_cache_;
     }

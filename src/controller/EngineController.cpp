@@ -85,18 +85,55 @@ EngineController::EngineController(SimulationEngine& engine, SnapshotManager& sn
     : engine_(engine), snapshot_(snapshotManager) {}
 
 
-/******************* RUN ********************/
+/**************** DESTRUCTOR *****************/
+
+EngineController::~EngineController()
+{
+    quit();
+    
+    if (simulationThread_.joinable())
+    {
+        simulationThread_.join();
+    }
+}
+
+
+/*************** SIMULATION LOOP *************/
+
+void EngineController::simulationLoop()
+{
+    while (!quitRequested_)
+    {
+        if (isRunning_ && !engine_.allRobotsReached()) 
+        {
+            engine_.runTick();
+            ++currentTick_;
+            updateGUI();
+            std::this_thread::sleep_for(std::chrono::milliseconds(500)); 
+        }
+        else
+        {
+            isRunning_ = false;
+            quitRequested_ = true; 
+            cv_.notify_all(); 
+        }
+    }
+}
+
+
+/******************** RUN ********************/
 
 void EngineController::run()
 {
     isRunning_ = true;
-    while (isRunning_ && !engine_.allRobotsReached())
+
+    if (!simulationThread_.joinable())
     {
-        engine_.runTick();
-        currentTick_++;
-        updateGUI();
-        std::this_thread::sleep_for(std::chrono::milliseconds(500));
+        simulationThread_ = std::thread(&EngineController::simulationLoop, this);    
     }
+
+    std::unique_lock<std::mutex> lock(mtx_);
+    cv_.wait(lock); 
 }
 
 
