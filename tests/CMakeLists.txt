@@ -49,3 +49,17 @@ target_link_libraries(test_bfs
 )
 
 add_test(NAME BFSTests COMMAND test_bfs)
+
+
+# ===============================
+# SnapshotManager tests
+# ===============================
+add_executable(test_snapshots test_snapshots.cpp)
+
+target_link_libraries(test_snapshots
+    robotics_sim_lib
+    gtest
+    gtest_main
+)
+
+add_test(NAME SnapshotManagerTests COMMAND test_snapshots)
