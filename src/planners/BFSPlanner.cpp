@@ -20,6 +20,12 @@ std::vector<Position> BFSPlanner::computePath(const SimulationState& state,
 
     size_t nHash = 0;
 
+    // Check if start and goal is within bounds
+    if (!isWithinBounds(start, grid) || !isWithinBounds(goal, grid))
+    {
+        return {};
+    }
+
     openQueue.push(start);
     visited[hashPos(start, grid)] = true;
 

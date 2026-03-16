@@ -35,3 +35,17 @@ target_link_libraries(test_dijkstra
 )
 
 add_test(NAME DijkstraTests COMMAND test_dijkstra)
+
+
+# ===============================
+# BFS tests
+# ===============================
+add_executable(test_bfs test_bfs.cpp)
+
+target_link_libraries(test_bfs
+    robotics_sim_lib
+    gtest
+    gtest_main
+)
+
+add_test(NAME BFSTests COMMAND test_bfs)
