@@ -63,3 +63,17 @@ target_link_libraries(test_snapshots
 )
 
 add_test(NAME SnapshotManagerTests COMMAND test_snapshots)
+
+
+# ===============================
+# EngineController tests
+# ===============================
+add_executable(test_controller test_controller.cpp)
+
+target_link_libraries(test_controller
+    robotics_sim_lib
+    gtest
+    gtest_main
+)
+
+add_test(NAME EngineControllerTests COMMAND test_controller)

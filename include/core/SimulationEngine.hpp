@@ -63,6 +63,15 @@ public:
     void runTick();
 
     /**
+     * @brief Replace the current simulation state.
+     *
+     * Used when restoring a snapshot during time-travel debugging.
+     * 
+     * @param state Current simulation state.
+     */
+    void setCurrentState(const SimulationState& state);
+
+    /**
      * @brief Access the current simulation state.
      * 
      * Provides a const reference to the current SimulationState. Useful for rendering, 

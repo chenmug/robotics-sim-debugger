@@ -46,6 +46,13 @@ public:
      */
     ~EngineController();
 
+    /**
+     * @brief Returns the current tick count of the simulation.
+     *
+     * @return The current tick.
+     */
+    size_t getCurrentTick() const;
+
     // Sets the isRunning_ flag to true and starts the simulation thread.
     void run();
 

@@ -79,22 +79,32 @@ void printGrid(const SimulationState& state, const GridConfig& grid)
 
 
 
-/**************** CONSTRUCTOR ****************/
+
+
+/*************** CONSTRUCTOR *****************/
 
 EngineController::EngineController(SimulationEngine& engine, SnapshotManager& snapshotManager)
     : engine_(engine), snapshot_(snapshotManager) {}
 
 
-/**************** DESTRUCTOR *****************/
+/*************** DESTRUCTOR ******************/
 
 EngineController::~EngineController()
 {
     quit();
-    
+
     if (simulationThread_.joinable())
     {
         simulationThread_.join();
     }
+}
+
+
+/************ GET CURRENT TICK ***************/
+
+size_t EngineController::getCurrentTick() const 
+{ 
+    return currentTick_; 
 }
 
 
@@ -129,17 +139,17 @@ void EngineController::run()
 
     if (!simulationThread_.joinable())
     {
-        simulationThread_ = std::thread(&EngineController::simulationLoop, this);    
+        simulationThread_ = std::thread(&EngineController::simulationLoop, this);
     }
 
     std::unique_lock<std::mutex> lock(mtx_);
-    cv_.wait(lock); 
+    cv_.wait(lock);
 }
 
 
 /****************** PAUSE ******************/
 
-void EngineController::pause() 
+void EngineController::pause()
 {
     isRunning_ = false;
 }
@@ -149,23 +159,35 @@ void EngineController::pause()
 
 void EngineController::stepForward()
 {
-    if (!isRunning_ && currentTick_ + 1 >= snapshot_.getSize())
+    if (currentTick_ + 1 < snapshot_.getSize())
+    {
+        ++currentTick_;
+        engine_.setCurrentState(*snapshot_.get(currentTick_));
+    }
+    else
     {
         engine_.runTick();
+        ++currentTick_;
     }
 
-    currentTick_++;
     updateGUI();
 }
 
 
-/**************** STEP BACK ****************/
+/**************** STEP BACK *****************/
 
 void EngineController::stepBack()
 {
     if (!isRunning_ && currentTick_ > 0)
     {
         --currentTick_;
+
+        const SimulationState* state = snapshot_.get(currentTick_);
+        if (state)
+        {
+            engine_.setCurrentState(*state);
+        }
+
         updateGUI();
     }
 }
@@ -173,7 +195,7 @@ void EngineController::stepBack()
 
 /**************** UPDATE GUI ****************/
 
-void EngineController::updateGUI() 
+void EngineController::updateGUI()
 {
     const SimulationState* state = snapshot_.get(currentTick_);
     if (state)

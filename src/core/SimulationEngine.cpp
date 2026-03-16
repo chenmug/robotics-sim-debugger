@@ -64,6 +64,19 @@ void SimulationEngine::runTick()
 
 /************** GET CURRENT STATE *************/
 
+void SimulationEngine::setCurrentState(const SimulationState& state)
+{
+    current_state = state;
+
+    for (auto& robot : robots)
+    {
+        robot->syncWithState(current_state);
+    }
+}
+
+
+/************** GET CURRENT STATE *************/
+
 const SimulationState& SimulationEngine::getCurrentState() const
 {
     return current_state;
