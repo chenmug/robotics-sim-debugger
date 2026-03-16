@@ -86,6 +86,21 @@ public:
      */
     virtual void act(SimulationState& state) = 0;
 
+    /**
+     * @brief Synchronize the robot's internal state with the simulation state.
+     *
+     * This function updates the robot's cached information (such as current position,
+     * goal position, and any other robot-specific caches) based on the provided 
+     * `SimulationState`.
+     *
+     * Each derived robot class must implement this method to correctly update its own
+     * caches, such as `planned_path_cache_`, `path_index_cache_`, `nextPos_`, or any
+     * other robot-specific internal data.
+     *
+     * @param state The current global simulation state to synchronize with.
+     */
+    virtual void syncWithState(const SimulationState& state) = 0;
+
     // Virtual destructor for proper cleanup of derived classes
     virtual ~Robot() = default;
 };

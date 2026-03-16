@@ -32,13 +32,8 @@ private:
     // Planner strategy
     std::shared_ptr<Planner> planner_;  // Planner strategy used by this robot.
 
-    /**
-     * @brief Syncs local cache with the current state of the robot in SimulationState.
-     * @param state Current simulation state
-     */
-    void syncWithState(const SimulationState& state);
-
 public:
+
     /**
      * @brief Construct a GridRobot with grid size and optional planner.
      * @param grid Grid configuration.
@@ -77,6 +72,14 @@ public:
      * @param state Current simulation state
      */
     void act(SimulationState& state) override;
+
+    /**
+     * @brief Syncs local cache with the current state of the robot in SimulationState.
+     * 
+     * @param state Current simulation state
+     */
+    void syncWithState(const SimulationState& state) override;
+
 
     /**
      * @brief Check if the robot has reached its goal.
