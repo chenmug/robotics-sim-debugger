@@ -8,6 +8,10 @@ FetchContent_Declare(
 
 FetchContent_MakeAvailable(googletest)
 
+
+# ===============================
+# A* tests
+# ===============================
 add_executable(test_astar test_astar.cpp)
 
 target_link_libraries(test_astar
@@ -17,3 +21,17 @@ target_link_libraries(test_astar
 )
 
 add_test(NAME AStarTests COMMAND test_astar)
+
+
+# ===============================
+# Dijkstra tests
+# ===============================
+add_executable(test_dijkstra test_dijkstra.cpp)
+
+target_link_libraries(test_dijkstra
+    robotics_sim_lib
+    gtest
+    gtest_main
+)
+
+add_test(NAME DijkstraTests COMMAND test_dijkstra)

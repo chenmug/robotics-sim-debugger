@@ -10,7 +10,7 @@
  */
 class AStarPlanner : public GraphSearchPlanner
 {
-protected:
+public:
     
     /**
      * @brief Compute the heuristic cost between two positions for A*.

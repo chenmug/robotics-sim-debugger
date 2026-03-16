@@ -12,7 +12,7 @@
  */
 class DijkstraPlanner : public GraphSearchPlanner
 {
-protected:
+public:
 
     // Heuristic function for Dijkstra's algorithm - always returns 0.
     int heuristic(const Position& a, const Position& b) const override;
