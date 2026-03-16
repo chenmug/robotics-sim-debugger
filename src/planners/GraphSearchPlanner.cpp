@@ -10,6 +10,12 @@ std::vector<Position> GraphSearchPlanner::computePath(const SimulationState& sta
     const Position start = robot.position;
     const Position goal  = robot.goal;
 
+    // Check if start and goal is within bounds
+    if (!isWithinBounds(start, grid) || !isWithinBounds(goal, grid))
+    {
+        return {};
+    }
+
     // Open set (priority queue) ordered by fScore (g + h)
     std::priority_queue<PQElement, std::vector<PQElement>, std::greater<PQElement>> openSet;
     std::unordered_map<size_t, int> gScore;
