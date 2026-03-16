@@ -7,20 +7,9 @@
 
 ## Overview
 
-Robotics Simulation Debugger is a **personal engineering project** developed in modern C++20, designed as a modular simulation framework for modeling robotic systems with clean architecture, concurrency, and interactive state inspection.
+Robotics Simulation Debugger is a **personal engineering project** developed in modern C++20. It provides a modular simulation framework for robotic systems with clean architecture, concurrency, and interactive state inspection.
 
-The system separates the simulation core from the GUI layer and provides time-control capabilities (run, pause, step forward, step backward) using a snapshot-based state management system.
-
-This project demonstrates:
-
-* Advanced OOP design
-* Polymorphism & SOLID principles
-* Strategy pattern for plannable robots
-* Multi-threaded simulation
-* Snapshot-based time travel
-* Clean separation between engine and UI
-* Linux-based CMake project structure
-* Unit testing for core components
+The system separates the simulation core from the UI and provides **time-control capabilities** (run, pause, step forward/backward) using a **snapshot-based state management system**.
 
 ---
 
@@ -28,48 +17,28 @@ This project demonstrates:
 
 ### 1. Multi-Threaded Simulation
 
-Threads:
-
 * Simulation Thread – advances world state
-* GUI Thread – renders state & handles user interaction
-
-Synchronization via:
-
-* `std::mutex`
-* `std::condition_variable`
-* Thread-safe access to shared state
-
-The GUI never directly mutates simulation state; it reads snapshots from the engine.
+* GUI Thread (planned) – reads snapshots & handles user interaction
+* Synchronization with `std::mutex` and `std::condition_variable`
+* GUI/Console never directly mutates simulation state; it reads snapshots
 
 ---
 
-### 2. Snapshot-Based Time Control (Planned)
+### 2. Snapshot-Based Time Control
 
-The simulation engine is designed to support snapshot-based state management.
-
-In future versions, each simulation tick will store a snapshot containing:
-
-* Robot states
-* Environment state
-
-This will enable advanced debugging capabilities such as:
-
-* Pause
-* Step forward
-* Step backward (rewind)
-* Timeline navigation
-
-Snapshots will allow deterministic replay and inspection of previous simulation states.
+* Each simulation tick automatically saves a snapshot
+* Snapshots store robot states and environment state
+* Supports **step forward/back** and deterministic replay
+* Console output shows **grid, robots, obstacles, and tick events**
 
 ---
 
 ### 3. Modular Robotics Framework
 
-### Robot Abstraction
+#### Robot Abstraction
 
-Robots in the simulation follow a **Sense -> Plan -> Act** execution pipeline.
-
-Each robot observes the current simulation state, plans its next movement using a planner, and then applies the action to the simulation.
+* Sense -> Plan -> Act pipeline
+* `GridRobot` as a concrete implementation
 
 ```cpp
 class Robot
@@ -86,17 +55,14 @@ public:
 };
 ```
 
-Concrete implementations:
+**Note:** This is a **partial interface**. Additional functions and internal members exist in the full implementation.
 
-* `GridRobot` – grid-based robot that navigates using a path planner
 
----
+#### Planner Strategy Pattern
 
-### Planner Strategy Pattern
-
-Path planning algorithms are implemented using the **Strategy Pattern**.
-
-Each planner computes a path for a robot from its current position to its goal without modifying the simulation state.
+* Path planners implement **Strategy Pattern**
+* Planners compute paths without modifying simulation state
+* Implemented: `AStarPlanner`, `DijkstraPlanner`, `BFSPlanner`
 
 ```cpp
 class Planner 
@@ -111,82 +77,45 @@ public:
 };
 ```
 
-Implemented Planners:
-
-* `AStarPlanner`
-* `DijkstraPlanner`
-* `BFSPlanner`
-
-The planner interface allows different algorithms to be swapped at runtime.
-
-The base planner class also provides shared utilities used by search algorithms, including:
-
-* grid boundary checks
-* obstacle detection
-* position hashing for efficient indexing
-* path reconstruction after search completion
-
 ---
 
 ### 4. Grid-Based Simulation
 
-* Static obstacles
-* Dynamic obstacles (added in simulation state)
+* Static and dynamic obstacles
 * Robot positions and goals
-* 4-directional movement (up, down, left, right)
+* 4-directional movement (up/down/left/right)
+* Real-time console rendering
 
 ---
 
-### 5. GUI (Planned)
+### 5. Console-Based Debugger
 
-A graphical debugger interface is planned using Dear ImGui + SDL2.
+Commands:
 
-The GUI will provide an interactive interface for inspecting and controlling the simulation.
+* `n` — step forward
+* `b` — step backward
+* `r` — run continuously
+* `p` — pause (**Note:** `p` currently does **not** work while running with `r`)
+* `q` — quit
 
-Planned panels include:
-
-**Simulation Control**
-
-* ▶ Run
-* ⏸ Pause
-* ⏭ Step Forward
-* ⏮ Step Back
-* Timeline Slider
+Snapshots ensure reliable forward/back stepping; each tick corresponds to a saved state.
 
 ---
 
-**Grid View**
+### 6. GUI (Planned)
 
-Visual representation of the environment:
-
-* Obstacles
-* Robots
-* Goals
-* Dynamic updates
-
----
-
-**Robot Inspector**
-
-Displays:
-
-* Current state
-* Active planner
-* Position
-* Target
-
----
-
-**Event Log**
-
-Structured output for simulation ticks.
+* Dear ImGui + SDL2
+* Simulation control panel
+* Grid visualization
+* Robot inspector
+* Event log
 
 ---
 
 ## Architecture Overview
 
 ```
-GUI Layer
+GUI Layer (planned)
    ↓
 Engine Controller
    ↓
@@ -198,12 +127,13 @@ Core Simulation Engine
    └── Simulation Loop
 ```
 
-The GUI interacts only through the Engine Controller.
-The Core Engine is headless and testable independently.
+* GUI interacts only through Engine Controller
+* Core Engine is headless and testable independently
+* SnapshotManager ensures deterministic replay
 
 ---
 
-## Design Patterns Used
+## Design Patterns
 
 * **Strategy Pattern** – Path planners
 * **State Machine** – Robot execution cycle
@@ -226,49 +156,20 @@ The Core Engine is headless and testable independently.
 ```
 robotics-sim-debugger/
 │
-├── CMakeLists.txt
-├── README.md
-│
 ├── include/
 │   ├── core/
-│   │   ├── SimulationEngine.hpp
-│   │   ├── SnapshotManager.hpp
-│   │   └── SimulationState.hpp
-│   │
 │   ├── robots/
-│   │   ├── Robot.hpp
-│   │   └── GridRobot.hpp
-│   │
 │   ├── planners/
-│   │   ├── Planner.hpp
-│   │   ├── GraphSearchPlanner.hpp
-│   │   ├── AStarPlanner.hpp
-│   │   ├── DijkstraPlanner.hpp
-│   │   └── BFSPlanner.hpp
-│   │
 │   └── controller/
-│       └── EngineController.hpp
 │
 ├── src/
 │   ├── core/
 │   ├── robots/
 │   ├── planners/
-│   ├── controller/
-│   └── main.cpp
-│
-├── gui/
-│   ├── GuiApp.cpp
-│   ├── GridRenderer.cpp
-│   ├── InspectorPanel.cpp
-│   └── LogPanel.cpp
-│
+│   └── controller/
+├── gui/ (planned)
 ├── tests/
-│   ├── test_planners.cpp
-│   ├── test_snapshot.cpp
-│   └── CMakeLists.txt
-│
 └── assets/
-    └── demo_scenarios/
 ```
 
 ---
@@ -280,15 +181,9 @@ Requirements:
 * C++20 compatible compiler
 * CMake ≥ 3.16
 
-Planned dependencies:
-
-* SDL2
-* Dear ImGui
-* GoogleTest
-
 Build:
 
-```
+```bash
 mkdir build
 cd build
 cmake ..
@@ -297,54 +192,56 @@ make
 
 Run:
 
-```
+```bash
 ./robotics_sim_debugger
 ```
 
 Run tests:
 
-```
+```bash
 ctest
 ```
 
 ---
 
-## Testing Strategy
+## Testing & Benchmark Strategy
 
-Testing infrastructure using **GoogleTest** is planned for future development.
-
-Planned tests include:
-
-* Unit tests for path planning algorithms
-* Snapshot consistency verification
-* Deterministic simulation behavior tests
-* Mocked components for isolated testing
+* GoogleTest for unit testing
+* Snapshot consistency tests
+* Step forward/back behavior
+* Deterministic simulation behavior
+* Planned: **Benchmarking simulation performance per tick**
 
 ---
 
-## Future Work / Ongoing Development
+## Future Work
 
-* **Collision Avoidance Between Robots** – dynamic replanning to prevent collisions in multi-robot scenarios
-* **GUI / Visualization** – interactive view with Dear ImGui or other graphics
-* **Sensor Integration** – lidar/proximity sensors per robot
-* **Dynamic Obstacles** – moving obstacles that require replanning
-* **Threading / Real-Time Simulation** – multi-threaded execution with safe state access
-* **Replay & Snapshot Navigation** – step forward/back and timeline control
-* **Logging & Event Handling** – structured simulation events and debug logs
+* GUI / Visualization
+* Dynamic Obstacles
+* Multi-Threaded Real-Time Simulation
+* Replay & Timeline Navigation
+* Logging & Event Handling
+* Performance Benchmarking
 
 ---
 
 ## Motivation
 
-This project is a **systems-oriented robotics simulation tool** emphasizing architecture, extensibility, and debuggability rather than graphics-heavy visualization.
+A **systems-oriented robotics simulation tool** emphasizing architecture, extensibility, and debuggability rather than graphics-heavy visualization.
 
-It reflects a focus on:
+Focus:
 
-- Core software engineering  
-- Modern C++ practices  
-- Robust architecture  
-- Practical systems design
+* Core software engineering
+* Object-Oriented Programming (OOP) principles
+* Modern C++ practices
+* Robust architecture
+* Practical systems design
 
 ---
 
-#### Current state is fully functional for grid-based path planning and console simulation, but several advanced features are in progress.
+#### Current State
+
+* Fully functional **grid-based path planning**
+* Console simulation with working **snapshots** and **step forward/back**
+* GUI and advanced features are in progress
+* **Pause (`p`) does not yet interrupt a running simulation (`r`)**
