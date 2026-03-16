@@ -12,8 +12,7 @@
 GridRobot::GridRobot(const GridConfig& grid, std::shared_ptr<Planner> planner)
     : grid_(grid), planner_(planner)
 {
-    // Add an ObstacleSensor with a detection range of 5
-    auto obstacleSensor = std::make_shared<ObstacleSensor>(5);
+    auto obstacleSensor = std::make_shared<ObstacleSensor>();
     addSensor(obstacleSensor);
 }
 
@@ -23,8 +22,21 @@ GridRobot::GridRobot(const GridConfig& grid, std::shared_ptr<Planner> planner)
 void GridRobot::syncWithState(const SimulationState& state)
 {
     const RobotState& self = state.robots[id_];
+
     currentPos_ = self.position;
     goal_ = self.goal;
+
+    planned_path_cache_ = self.planned_path;
+    path_index_cache_ = self.path_index;
+
+    if (!planned_path_cache_.empty() && path_index_cache_ < planned_path_cache_.size())
+    {
+        nextPos_ = planned_path_cache_[path_index_cache_];
+    }
+    else
+    {
+        nextPos_ = currentPos_;
+    }
 }
 
 
@@ -65,7 +77,7 @@ void GridRobot::plan(SimulationState& state)
     RobotState& self = state.robots[id_];
 
     // Compute new path if planner exists and path is empty or finished
-    if (planner_ && (planned_path_cache_.empty() || path_index_cache_ > planned_path_cache_.size()))
+    if (planner_ && (planned_path_cache_.empty() || path_index_cache_ >= planned_path_cache_.size()))
     {
         planned_path_cache_ = planner_->computePath(state, self, grid_);
         path_index_cache_ = 0;

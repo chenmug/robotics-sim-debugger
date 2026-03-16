@@ -20,9 +20,9 @@ public:
     /**
      * @brief Constructs an ObstacleSensor with a specified detection range.
      *
-     * @param range The detection range in grid units.
+     * @param range The detection range in grid units. defult is 5.
      */
-    explicit ObstacleSensor(int range);
+    explicit ObstacleSensor(int range = 5);
 
     /**
      * @brief Reads the current simulation state and returns sensor data.
