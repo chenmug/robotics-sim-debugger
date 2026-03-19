@@ -11,6 +11,8 @@ Robotics Simulation Debugger is a **personal engineering project** developed in 
 
 The system separates the simulation core from the UI and provides **time-control capabilities** (run, pause, step forward/backward) using a **snapshot-based state management system**.
 
+Additionally, the project is evolving into a **deterministic debugging framework**, enabling deep inspection of system behavior through replay and breakpoint mechanisms.
+
 ---
 
 ## Key Features
@@ -24,16 +26,57 @@ The system separates the simulation core from the UI and provides **time-control
 
 ---
 
-### 2. Snapshot-Based Time Control
+### 2. Snapshot-Based Time Control & Replay
 
 * Each simulation tick automatically saves a snapshot
 * Snapshots store robot states and environment state
-* Supports **step forward/back** and deterministic replay
-* Console output shows **grid, robots, obstacles, and tick events**
+* Supports:
+
+  * **Step forward / backward**
+  * **Replay from the beginning (planned)**
+  * **Jump to specific tick (planned)**
+  * **Play forward from arbitrary state (planned)**
+
+Snapshots ensure **deterministic execution**, allowing reproducible debugging and consistent system analysis.
 
 ---
 
-### 3. Modular Robotics Framework
+### 3. Breakpoint System (Planned)
+
+The system is being extended with a **debugger-style breakpoint mechanism**, allowing automatic pause of the simulation when specific conditions are met.
+
+Planned breakpoint types:
+
+#### Tick-Based Breakpoints
+
+Pause execution at a specific simulation step:
+
+```
+Break at tick = 100
+```
+
+#### State-Based Breakpoints
+
+Pause when a robot enters a specific state:
+
+```
+Break when RobotState == REPLANNING
+```
+
+#### Event-Based Breakpoints (Future Extension)
+
+Pause when specific events occur:
+
+```
+Break on ObstacleDetected
+Break on ReplanTriggered
+```
+
+This transforms the simulator into a **domain-specific debugging tool** for robotic systems.
+
+---
+
+### 4. Modular Robotics Framework
 
 #### Robot Abstraction
 
@@ -57,6 +100,7 @@ public:
 
 **Note:** This is a **partial interface**. Additional functions and internal members exist in the full implementation.
 
+---
 
 #### Planner Strategy Pattern
 
@@ -79,7 +123,7 @@ public:
 
 ---
 
-### 4. Grid-Based Simulation
+### 5. Grid-Based Simulation
 
 * Static and dynamic obstacles
 * Robot positions and goals
@@ -88,27 +132,50 @@ public:
 
 ---
 
-### 5. Console-Based Debugger
+### 6. Console-Based Debugger
 
 Commands:
 
 * `n` — step forward
 * `b` — step backward
 * `r` — run continuously
-* `p` — pause (**Note:** `p` currently does **not** work while running with `r`)
+* `p` — pause
 * `q` — quit
 
 Snapshots ensure reliable forward/back stepping; each tick corresponds to a saved state.
 
+Planned extensions:
+
+* Breakpoint-triggered pause
+* Timeline navigation
+* Replay controls
+
 ---
 
-### 6. GUI (Planned)
+### 7. Performance Benchmarking (Planned)
+
+The system will include built-in instrumentation for measuring simulation performance.
+
+Planned metrics:
+
+* Tick execution time (ms)
+* Planner computation time
+* Number of processed actions per tick
+* Pathfinding complexity (e.g., nodes explored)
+
+These metrics will be used for both debugging and performance analysis.
+
+---
+
+### 8. GUI (Planned)
 
 * Dear ImGui + SDL2
 * Simulation control panel
 * Grid visualization
 * Robot inspector
 * Event log
+* Timeline slider
+* Breakpoint management UI
 
 ---
 
@@ -210,7 +277,10 @@ ctest
 * Snapshot consistency tests
 * Step forward/back behavior
 * Deterministic simulation behavior
-* Planned: **Benchmarking simulation performance per tick**
+* Planned:
+
+  * Benchmarking per tick
+  * Breakpoint behavior validation
 
 ---
 
@@ -219,8 +289,8 @@ ctest
 * GUI / Visualization
 * Dynamic Obstacles
 * Multi-Threaded Real-Time Simulation
-* Replay & Timeline Navigation
-* Logging & Event Handling
+* Timeline Navigation (jump to tick)
+* Breakpoint System
 * Performance Benchmarking
 
 ---
@@ -243,5 +313,6 @@ Focus:
 
 * Fully functional **grid-based path planning**
 * Console simulation with working **snapshots** and **step forward/back**
-* GUI and advanced features are in progress
-* **Pause (`p`) does not yet interrupt a running simulation (`r`)**
+* Deterministic execution enabled via snapshot system
+* GUI and advanced debugging features are in progress
+* Pause (`p`) works correctly even while running (`r`)

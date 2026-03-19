@@ -49,8 +49,14 @@ int main()
     // ---------------------------
     // Main loop
     // ---------------------------
-    while (!controller.isFinished())
+    while (true)
     {
+        if (controller.isFinished())
+        {
+            std::cout << "All robots reached their goals.\nSimulation ended.\n";
+            break;
+        }
+
         std::cout << "Commands: [n]ext, [b]ack, [r]un, [p]ause, [q]uit: ";
         char cmd;
         std::cin >> cmd;
@@ -83,8 +89,6 @@ int main()
             break;
         }
     }
-
-    std::cout << "All robots reached their goals.\nSimulation ended.\n";
 
     return 0;
 }
