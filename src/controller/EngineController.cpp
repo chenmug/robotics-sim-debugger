@@ -4,6 +4,7 @@
 #include <iostream>
 
 
+
 // TODO: move to GUI layer when switching to graphical rendering
 void printGrid(const SimulationState& state, const GridConfig& grid)
 {
@@ -81,13 +82,18 @@ void printGrid(const SimulationState& state, const GridConfig& grid)
 
 
 
-/*************** CONSTRUCTOR *****************/
+
+// /*************** CONSTRUCTOR *****************/
 
 EngineController::EngineController(SimulationEngine& engine, SnapshotManager& snapshotManager)
-    : engine_(engine), snapshot_(snapshotManager) {}
+    : engine_(engine), snapshot_(snapshotManager)
+{
+    simulationThread_ = std::thread(&EngineController::simulationLoop, this);
+}
 
 
-/*************** DESTRUCTOR ******************/
+
+// /*************** DESTRUCTOR ******************/
 
 EngineController::~EngineController()
 {
@@ -100,7 +106,7 @@ EngineController::~EngineController()
 }
 
 
-/************ GET CURRENT TICK ***************/
+// /************ GET CURRENT TICK ***************/
 
 size_t EngineController::getCurrentTick() const 
 { 
@@ -108,57 +114,76 @@ size_t EngineController::getCurrentTick() const
 }
 
 
-/*************** SIMULATION LOOP *************/
+// /*************** SIMULATION LOOP *************/
 
 void EngineController::simulationLoop()
 {
-    while (!quitRequested_)
+    std::unique_lock<std::mutex> lock(mtx_);
+
+    while (true)
     {
-        if (isRunning_ && !engine_.allRobotsReached()) 
-        {
-            engine_.runTick();
-            ++currentTick_;
-            updateGUI();
-            std::this_thread::sleep_for(std::chrono::milliseconds(500)); 
-        }
-        else
+        cv_.wait(lock, [this]() { return isRunning_ || quitRequested_; });
+
+        if (quitRequested_)
+            break;
+
+        if (engine_.allRobotsReached())
         {
             isRunning_ = false;
-            quitRequested_ = true; 
             cv_.notify_all(); 
+            continue; 
         }
+
+        engine_.runTick();
+        ++currentTick_;
+        updateGUI();
+
+        lock.unlock();
+        std::this_thread::sleep_for(std::chrono::milliseconds(500));
+        lock.lock();
     }
 }
 
 
-/******************** RUN ********************/
+// /******************** RUN ********************/
 
 void EngineController::run()
 {
-    isRunning_ = true;
-
-    if (!simulationThread_.joinable())
     {
-        simulationThread_ = std::thread(&EngineController::simulationLoop, this);
+        std::lock_guard<std::mutex> lock(mtx_);
+        if (!isRunning_)
+        {
+            isRunning_ = true;
+            quitRequested_ = false;
+        }
     }
 
-    std::unique_lock<std::mutex> lock(mtx_);
-    cv_.wait(lock);
+    cv_.notify_all();
 }
 
 
-/****************** PAUSE ******************/
+// /****************** PAUSE ******************/
 
 void EngineController::pause()
 {
-    isRunning_ = false;
+    {
+        std::lock_guard<std::mutex> lock(mtx_);
+        isRunning_ = false;
+
+        currentTick_ = snapshot_.getSize() - 1;
+    }
+
+    cv_.notify_all();
 }
 
 
-/************** STEP FORWARD ***************/
+// /************** STEP FORWARD ***************/
 
 void EngineController::stepForward()
 {
+    std::unique_lock<std::mutex> lock(mtx_);
+    isRunning_ = false;
+
     if (currentTick_ + 1 < snapshot_.getSize())
     {
         ++currentTick_;
@@ -174,30 +199,42 @@ void EngineController::stepForward()
 }
 
 
-/**************** STEP BACK *****************/
+// /**************** STEP BACK *****************/
 
 void EngineController::stepBack()
 {
-    if (!isRunning_ && currentTick_ > 0)
+    std::unique_lock<std::mutex> lock(mtx_);
+    isRunning_ = false;
+
+    if (currentTick_ > 0)
     {
         --currentTick_;
-
         const SimulationState* state = snapshot_.get(currentTick_);
         if (state)
         {
             engine_.setCurrentState(*state);
         }
-
-        updateGUI();
     }
+
+    updateGUI();
 }
 
 
-/**************** UPDATE GUI ****************/
+// /**************** UPDATE GUI ****************/
 
 void EngineController::updateGUI()
 {
-    const SimulationState* state = snapshot_.get(currentTick_);
+    const SimulationState* state = nullptr;
+
+    if (isRunning_)  // Run mode
+    {
+        state = snapshot_.getLast(); 
+    }
+    else  // Pause mode
+    {
+        state = snapshot_.get(currentTick_); 
+    }
+
     if (state)
     {
         printGrid(*state, engine_.getGridConfig());
@@ -205,18 +242,24 @@ void EngineController::updateGUI()
 }
 
 
-/****************** QUIT *******************/
+// /****************** QUIT *******************/
 
 void EngineController::quit()
 {
-    isRunning_ = false;
-    quitRequested_ = true;
+    {
+        std::lock_guard<std::mutex> lock(mtx_);
+        isRunning_ = false;
+        quitRequested_ = true;
+    }
+
+    cv_.notify_all();
 }
 
 
-/*************** IS FINISHED ***************/
+// /*************** IS FINISHED ***************/
 
 bool EngineController::isFinished() const
 {
+    std::lock_guard<std::mutex> lock(mtx_);
     return engine_.allRobotsReached();
 }

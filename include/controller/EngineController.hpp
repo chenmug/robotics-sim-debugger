@@ -26,7 +26,7 @@ private:
     std::atomic<bool> quitRequested_ = false;  // Signals the simulation thread to terminate.
     std::thread simulationThread_;             // Background thread responsible for advancing simulation ticks.
 
-    std::mutex mtx_;              // Mutex for synchronizing access to shared resources.
+    mutable std::mutex mtx_;      // Mutex for synchronizing access to shared resources.
     std::condition_variable cv_;  // Condition variable for thread synchronization.
 
 public:
