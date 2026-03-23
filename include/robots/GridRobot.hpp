@@ -112,17 +112,19 @@ public:
 
     /**
      * @brief Get the current planned path of the robot.
-     * @param state The current simulation state.
+     * 
+     * @param state The current simulation state (unused, for interface compatibility)
      * 
      * @return Reference to the vector of Positions representing the path.
      */
-    const std::vector<Position>& getPath(const SimulationState& state) const;
+    const std::vector<Position>& getPath([[maybe_unused]] const SimulationState& state) const;
     
     /**
      * @brief Get the current index in the planned path.
-     * @param state The current simulation state.
+     * 
+     * @param state The current simulation state (unused, for interface compatibility)
      * 
      * @return Index of the next step in the path.
      */
-    size_t getPathIndex(const SimulationState& state) const;
+    size_t getPathIndex([[maybe_unused]] const SimulationState& state) const;
 };

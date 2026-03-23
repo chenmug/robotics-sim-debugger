@@ -1,6 +1,8 @@
 #pragma once
-#include <vector>   // For std::vector
-#include <cstddef>  // For size_t
+#include "robots/RobotMode.hpp"  // Forward Declaration
+#include <vector>                // For std::vector
+#include <cstddef>               // For size_t
+
 
 /**
  * @brief Represents a 2D coordinate in the simulation grid.
@@ -46,6 +48,7 @@ struct Position
  * - the planned path produced by a planner
  * - the index of the next step along that path
  * - its next planned position
+ * - the robot mode.
  *
  * The simulation engine updates this structure each tick as the robot
  * moves through the environment.
@@ -58,6 +61,7 @@ struct RobotState
     std::vector<Position> planned_path; // Precomputed path (absolute coordinates)
     size_t path_index = 0;              // Index of the next step in the planned path
     Position nextPlannedPos;            // Next planned position of the robot
+    RobotMode mode = RobotMode::IDLE;   // The robot mode. default is IDLE
 };
 
 /**

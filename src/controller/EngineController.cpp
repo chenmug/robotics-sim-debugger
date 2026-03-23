@@ -97,6 +97,7 @@ EngineController::EngineController(SimulationEngine& engine, SnapshotManager& sn
 
 EngineController::~EngineController()
 {
+    // Ensure simulation thread exits safely before destruction
     quit();
 
     if (simulationThread_.joinable())
@@ -122,6 +123,7 @@ void EngineController::simulationLoop()
 
     while (true)
     {
+        // Wait until running or quitting
         cv_.wait(lock, [this]() { return isRunning_ || quitRequested_; });
 
         if (quitRequested_)
@@ -137,6 +139,12 @@ void EngineController::simulationLoop()
         engine_.runTick();
         ++currentTick_;
         updateGUI();
+
+        if (checkBreakpoints())
+        {
+            isRunning_ = false;
+            std::cout << "[Simulation paused due to breakpoint at tick " << currentTick_ << "]\n";
+        }
 
         lock.unlock();
         std::this_thread::sleep_for(std::chrono::milliseconds(500));
@@ -262,4 +270,36 @@ bool EngineController::isFinished() const
 {
     std::lock_guard<std::mutex> lock(mtx_);
     return engine_.allRobotsReached();
+}
+
+
+// /************ CHECK BREAKPOINTS ************/
+
+bool EngineController::checkBreakpoints() const
+{
+    const SimulationState* state = nullptr;
+
+    if (isRunning_)
+    {
+        state = snapshot_.getLast();
+    }
+    else
+    {
+        state = snapshot_.get(currentTick_);
+    }
+
+    if (!state)
+    {
+        return false;
+    }
+
+    return breakpointManager_.shouldBreak(*state, currentTick_);
+}
+
+
+// /********* GET BREAKPOINT MANAGER **********/
+
+BreakpointManager& EngineController::getBreakpointManager()
+{
+    return breakpointManager_;
 }

@@ -4,6 +4,7 @@
 #include "planners/AStarPlanner.hpp"
 #include "planners/DijkstraPlanner.hpp"
 #include "planners/BFSPlanner.hpp"
+#include "controller/BreakpointManager.hpp"
 #include <iostream>
 
 
@@ -43,6 +44,16 @@ int main()
     // Engine controller
     // ---------------------------
     EngineController controller(engine, engine.getSnapshotManager());
+
+
+    // ---------------------------
+    // ADD BREAKPOINTS
+    // ---------------------------
+    // Pause at tick 3
+    controller.getBreakpointManager().addTickBreakpoint(3);
+
+    // Pause when robot 1 enters IDLE mode
+    controller.getBreakpointManager().addRobotBreakpoint(0, RobotMode::IDLE);
 
     controller.updateGUI();
 

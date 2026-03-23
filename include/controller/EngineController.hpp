@@ -1,18 +1,21 @@
 #pragma once
-#include "core/SimulationEngine.hpp"  // Forward Declaration
-#include "core/SnapshotManager.hpp"   // Forward Declaration
-#include <atomic>                     // For std::atomic
-#include <thread>                     // For std::thread
-#include <mutex>                      // For std::mutex
-#include <condition_variable>         // For std::condition_variable
+#include "core/SimulationEngine.hpp"         // Forward Declaration
+#include "core/SnapshotManager.hpp"          // Forward Declaration
+#include "controller/BreakpointManager.hpp"  // Forward Declaration
+#include <atomic>                            // For std::atomic
+#include <thread>                            // For std::thread
+#include <mutex>                             // For std::mutex
+#include <condition_variable>                // For std::condition_variable
 
 
 /**
- * @brief Controls simulation execution and user interaction.
+ * @brief Controls the simulation execution and user interactions.
  *
- * Coordinates between the user interface, SimulationEngine, and SnapshotManager.
- * Manages the simulation thread and supports run, pause, and time-travel debugging
- * (step forward/backward).
+ * EngineController is responsible for:
+ * - Coordinating between the SimulationEngine and SnapshotManager.
+ * - Managing the simulation loop in a background thread.
+ * - Supporting run, pause, step-forward, and step-back operations.
+ * - Handling breakpoints (tick-based and robot-mode-based) via BreakpointManager.
  */
 class EngineController 
 {
@@ -28,6 +31,8 @@ private:
 
     mutable std::mutex mtx_;      // Mutex for synchronizing access to shared resources.
     std::condition_variable cv_;  // Condition variable for thread synchronization.
+
+    BreakpointManager breakpointManager_;  // Manages breakpoints for tick and robot mode.
 
 public:
     /**
@@ -78,8 +83,22 @@ public:
      */
     bool isFinished() const;
 
+    /**
+     * @brief Access the internal BreakpointManager.
+     *
+     * @return Reference to BreakpointManager.
+     */
+    BreakpointManager& getBreakpointManager();
+
 private:
 
     // Main simulation loop executed by `simulationThread_`.
     void simulationLoop();
+
+    /**
+     * @brief Check if any breakpoints are triggered at the current tick/state.
+     *
+     * @return True if a breakpoint condition is met, false otherwise.
+     */
+    bool checkBreakpoints() const;
 };
