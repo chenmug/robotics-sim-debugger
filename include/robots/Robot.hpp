@@ -1,7 +1,9 @@
 #pragma once
 #include "core/SimulationState.hpp"  // Forward Declaration
 #include "sensors/Sensor.hpp"        // Forward Declaration
+#include "robots/RobotMode.hpp"      // Forward Declaration
 #include <cstddef>                   // For size_t
+
 
 /**
  * @brief Abstract base class for all robots in the simulation.
@@ -21,6 +23,7 @@ protected:
     size_t id_ = 0;                                 // Unique robot identifier
     std::vector<std::shared_ptr<Sensor>> sensors_;  // List of sensors attached to this robot
     std::vector<SensorData> sensorDataCache_;       // Cached readings from all sensors
+    RobotMode mode_ = RobotMode::IDLE;              // Current mode of the robot
 
 public:
     /**
@@ -30,7 +33,7 @@ public:
      *
      * @param id a unique robot identifier
      */
-    void setID(size_t id) { id_ = id; }
+    void setID(size_t id);
 
     /**
      * @brief Get the unique identifier of the robot.
@@ -39,21 +42,31 @@ public:
      * 
      * @return size_t The robot's unique ID
      */
-    size_t getID() const { return id_; }
+    size_t getID() const;
 
     /**
      * @brief Attach a new sensor to this robot.
      *
      * @param sensor Shared pointer to a sensor instance.
      */
-    void addSensor(std::shared_ptr<Sensor> sensor) { sensors_.push_back(sensor); }
+    void addSensor(std::shared_ptr<Sensor> sensor);
 
     /**
      * @brief Access the last cached sensor readings.
      *
      * @return const reference to vector of SensorData
      */
-    const std::vector<SensorData>& getSensorDataCache() const { return sensorDataCache_; }
+    const std::vector<SensorData>& getSensorDataCache() const;
+
+    /**
+     * @brief Set the current mode of the robot.
+     */
+    void setMode(RobotMode mode);
+
+    /**
+     * @brief Get the current mode of the robot.
+     */
+    RobotMode getMode() const;
 
     /**
      * @brief Observe the environment.
@@ -87,17 +100,16 @@ public:
     virtual void act(SimulationState& state) = 0;
 
     /**
-     * @brief Synchronize the robot's internal state with the simulation state.
+     * @brief Synchronize the robot's internal caches with the SimulationState.
      *
-     * This function updates the robot's cached information (such as current position,
-     * goal position, and any other robot-specific caches) based on the provided 
-     * `SimulationState`.
+     * Must update all relevant fields including:
+     * - current position
+     * - goal position
+     * - planned path caches
+     * - next planned position
+     * - mode (crucial for robot-based breakpoints)
      *
-     * Each derived robot class must implement this method to correctly update its own
-     * caches, such as `planned_path_cache_`, `path_index_cache_`, `nextPos_`, or any
-     * other robot-specific internal data.
-     *
-     * @param state The current global simulation state to synchronize with.
+     * @param state The current global simulation state.
      */
     virtual void syncWithState(const SimulationState& state) = 0;
 
