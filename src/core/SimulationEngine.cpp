@@ -58,6 +58,11 @@ void SimulationEngine::runTick()
         robot->act(current_state);
     }
 
+    for (size_t i = 0; i < robots.size(); ++i) 
+    {
+        current_state.robots[i].mode = robots[i]->getMode();
+    }
+
     snapshotManager_.save(current_state);
 }
 
