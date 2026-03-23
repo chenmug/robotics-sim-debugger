@@ -4,8 +4,6 @@
 #include "sensors/ObstacleSensor.hpp"
 #include <iostream>
 
-#define UNUSED(x) (void)x
-
 
 /**************** CONSTRUCTOR ****************/
 
@@ -37,6 +35,8 @@ void GridRobot::syncWithState(const SimulationState& state)
     {
         nextPos_ = currentPos_;
     }
+
+    mode_ = self.mode;
 }
 
 
@@ -75,6 +75,10 @@ void GridRobot::plan(SimulationState& state)
     // Sync robot cache with current simulation state
     syncWithState(state);
     RobotState& self = state.robots[id_];
+    
+    // Change mode BEFORE planning
+    self.mode = RobotMode::PLANNING;
+    mode_ = self.mode;
 
     // Compute new path if planner exists and path is empty or finished
     if (planner_ && (planned_path_cache_.empty() || path_index_cache_ >= planned_path_cache_.size()))
@@ -110,6 +114,10 @@ void GridRobot::plan(SimulationState& state)
 void GridRobot::act(SimulationState& state)
 {
     RobotState& self = state.robots[id_];
+    
+    // Change mode BEFORE moving
+    self.mode = RobotMode::MOVING;
+    mode_ = self.mode;
 
     currentPos_ = nextPos_;
     self.position = currentPos_;
@@ -118,6 +126,12 @@ void GridRobot::act(SimulationState& state)
     {
         ++path_index_cache_;
         self.path_index = path_index_cache_;
+    }
+
+    else  // Reached the goal
+    {
+        self.mode = RobotMode::IDLE;
+        mode_ = self.mode;
     }
 }
 
@@ -166,19 +180,15 @@ void GridRobot::setPath(const std::vector<Position>& path, SimulationState& stat
 
 /**************** GET PATH *****************/
 
-const std::vector<Position>& GridRobot::getPath(const SimulationState& state) const
+const std::vector<Position>& GridRobot::getPath([[maybe_unused]] const SimulationState& state) const
 {
-    UNUSED(state);
-
     return planned_path_cache_;
 }
 
 
 /************** GET PATH INDEX *************/
 
-size_t GridRobot::getPathIndex(const SimulationState& state) const
+size_t GridRobot::getPathIndex([[maybe_unused]] const SimulationState& state) const
 {
-    UNUSED(state);
-    
     return path_index_cache_;
 }
