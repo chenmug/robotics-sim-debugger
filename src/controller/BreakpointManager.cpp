@@ -1,18 +1,17 @@
+#include "controller/Breakpoint.hpp"
 #include "controller/BreakpointManager.hpp"
+#include "controller/TickBreakpoint.hpp"
+#include "controller/RobotModeBreakpoint.hpp"
 
 
 // /*********** ADD TICK BREAKPOINT ***********/
 
 size_t BreakpointManager::addTickBreakpoint(size_t tick)
 {
-    Breakpoint tickBreakpoint;
-    tickBreakpoint.breakpointID = nextBreakpointID_++;
-    tickBreakpoint.tick = tick;
-    tickBreakpoint.type = BreakpointType::TICK;
-    
-    breakpoints_.push_back(tickBreakpoint);
+    size_t id = nextBreakpointID_++;
+    breakpoints_.push_back(std::make_unique<TickBreakpoint>(id, tick));
 
-    return tickBreakpoint.breakpointID;
+    return id;
 }
 
 
@@ -20,15 +19,10 @@ size_t BreakpointManager::addTickBreakpoint(size_t tick)
 
 size_t BreakpointManager::addRobotBreakpoint(size_t robotId, RobotMode mode)
 {
-    Breakpoint robotBreakpoint;
-    robotBreakpoint.breakpointID = nextBreakpointID_++;
-    robotBreakpoint.robotId = robotId;
-    robotBreakpoint.mode = mode;
-    robotBreakpoint.type = BreakpointType::ROBOT_MODE;
-    
-    breakpoints_.push_back(robotBreakpoint);
+    size_t id = nextBreakpointID_++;
+    breakpoints_.push_back(std::make_unique<RobotModeBreakpoint>(id, robotId, mode));
 
-    return robotBreakpoint.breakpointID;
+    return id;
 }
 
 
@@ -38,7 +32,7 @@ bool BreakpointManager::removeBreakpoint(size_t breakpointID)
 {
     for (auto it = breakpoints_.begin(); it != breakpoints_.end(); ++it)
     {
-        if (it->breakpointID == breakpointID)
+        if ((*it)->getID() == breakpointID)
         {
             breakpoints_.erase(it);
             return true;
@@ -57,32 +51,13 @@ void BreakpointManager::clearAllBreakpoints()
 }
 
 
-// /*********** IS TICK BREAKPOINT ************/
+// /************** SHOULD BREAK ***************/
 
-bool BreakpointManager::isTickBreakpoint(size_t currentTick) const
+bool BreakpointManager::shouldBreak(const SimulationState& state, size_t tick) const
 {
     for (const auto& bp : breakpoints_)
     {
-        if (bp.type == BreakpointType::TICK && bp.tick.has_value() 
-            && bp.tick.value() == currentTick)
-        {
-            return true;
-        }
-    }
-
-    return false;
-}
-
-
-// /********** IS ROBOT BREAKPOINT ************/
-
-bool BreakpointManager::isRobotBreakpoint(size_t robotId, RobotMode mode) const
-{
-    for (const auto& bp : breakpoints_)
-    {
-        if (bp.type == BreakpointType::ROBOT_MODE &&  bp.robotId.has_value()
-            && bp.robotId.value() == robotId && bp.mode.has_value() && 
-            bp.mode.value() == mode)
+        if (bp->shouldBreak(state, tick))
         {
             return true;
         }
@@ -94,7 +69,7 @@ bool BreakpointManager::isRobotBreakpoint(size_t robotId, RobotMode mode) const
 
 // /************* GET BREAKPOINT **************/
 
-const std::vector<Breakpoint>& BreakpointManager::getBreakpoints() const
+const std::vector<std::unique_ptr<Breakpoint>>& BreakpointManager::getBreakpoints() const
 {
     return breakpoints_;
 }
