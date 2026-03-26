@@ -4,6 +4,7 @@
 #include "robots/Robot.hpp"           // Forward Declaration
 #include <vector>                     // For std::vector
 #include <cstddef>                    // For size_t
+#include <queue>                      // For std::queue
 
 
 /**
@@ -19,6 +20,7 @@ private:
 
     std::vector<std::unique_ptr<Breakpoint>> breakpoints_;  // Stored breakpoints
     size_t nextBreakpointID_ = 0;                           // Next unique ID for breakpoints
+    std::queue<size_t> removedIDs_;                         // Restore the removed IDs
 
 public:
     

@@ -8,9 +8,20 @@
 
 size_t BreakpointManager::addTickBreakpoint(size_t tick)
 {
-    size_t id = nextBreakpointID_++;
-    breakpoints_.push_back(std::make_unique<TickBreakpoint>(id, tick));
+    size_t id = 0;
 
+    if (!removedIDs_.empty())
+    {
+        id = removedIDs_.front();
+        removedIDs_.pop();
+    }
+    else
+    {
+        id = nextBreakpointID_++;
+    }
+
+    breakpoints_.push_back(std::make_unique<TickBreakpoint>(id, tick));
+    
     return id;
 }
 
@@ -19,7 +30,18 @@ size_t BreakpointManager::addTickBreakpoint(size_t tick)
 
 size_t BreakpointManager::addRobotBreakpoint(size_t robotId, RobotMode mode)
 {
-    size_t id = nextBreakpointID_++;
+    size_t id = 0;
+
+    if (!removedIDs_.empty())
+    {
+        id = removedIDs_.front();
+        removedIDs_.pop();
+    }
+    else
+    {
+        id = nextBreakpointID_++;
+    }
+
     breakpoints_.push_back(std::make_unique<RobotModeBreakpoint>(id, robotId, mode));
 
     return id;
@@ -35,6 +57,8 @@ bool BreakpointManager::removeBreakpoint(size_t breakpointID)
         if ((*it)->getID() == breakpointID)
         {
             breakpoints_.erase(it);
+            removedIDs_.push(breakpointID);
+
             return true;
         }
     }

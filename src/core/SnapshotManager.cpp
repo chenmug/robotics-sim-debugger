@@ -65,3 +65,14 @@ void SnapshotManager::clearSnapshots()
 {
     snapshots_.clear();
 }
+
+
+/*********** REMOVE FUTURE SNAPSHOTS ***********/
+
+void SnapshotManager::removeFutureSnapshots(size_t fromTick)
+{
+    if (fromTick < snapshots_.size())
+    {
+        snapshots_.resize(fromTick);
+    }
+}
