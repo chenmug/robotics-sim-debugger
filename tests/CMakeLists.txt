@@ -77,3 +77,17 @@ target_link_libraries(test_controller
 )
 
 add_test(NAME EngineControllerTests COMMAND test_controller)
+
+
+# ===============================
+# BreakpointManager tests
+# ===============================
+add_executable(test_breakpoints test_breakpoints.cpp)
+
+target_link_libraries(test_breakpoints
+    robotics_sim_lib
+    gtest
+    gtest_main
+)
+
+add_test(NAME BreakpointManagerTests COMMAND test_breakpoints)

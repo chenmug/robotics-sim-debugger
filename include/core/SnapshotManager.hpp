@@ -93,4 +93,16 @@ public:
      * @brief Clear all stored snapshots. Used when resetting the simulation.
      */
     void clearSnapshots();
+
+    /**
+     * @brief Discards all future snapshots starting from a given tick.
+     *
+     * Ensures timeline consistency by removing any snapshots that lie ahead
+     * of the specified tick. This is required when resuming simulation from
+     * a past state, preventing divergence between historical and newly
+     * generated execution paths.
+     *
+     * @param fromTick First snapshot index to discard.
+     */
+    void removeFutureSnapshots(size_t fromTick);
 };

@@ -8,7 +8,7 @@
 // TODO: move to GUI layer when switching to graphical rendering
 void printGrid(const SimulationState& state, const GridConfig& grid)
 {
-    std::system("clear"); 
+    // std::system("clear"); 
     std::cout << "Robotics Simulation Debugger - Console MVP\n";
     std::cout << "Tick: " << state.tick << "\n\n";
 
@@ -92,7 +92,6 @@ EngineController::EngineController(SimulationEngine& engine, SnapshotManager& sn
 }
 
 
-
 // /*************** DESTRUCTOR ******************/
 
 EngineController::~EngineController()
@@ -159,11 +158,14 @@ void EngineController::run()
 {
     {
         std::lock_guard<std::mutex> lock(mtx_);
-        if (!isRunning_)
+
+        if (currentTick_ + 1 < snapshot_.getSize())
         {
-            isRunning_ = true;
-            quitRequested_ = false;
+            snapshot_.removeFutureSnapshots(currentTick_ + 1); 
         }
+
+        isRunning_ = true;
+        quitRequested_ = false;
     }
 
     cv_.notify_all();
@@ -232,17 +234,7 @@ void EngineController::stepBack()
 
 void EngineController::updateGUI()
 {
-    const SimulationState* state = nullptr;
-
-    if (isRunning_)  // Run mode
-    {
-        state = snapshot_.getLast(); 
-    }
-    else  // Pause mode
-    {
-        state = snapshot_.get(currentTick_); 
-    }
-
+    const SimulationState* state = snapshot_.get(currentTick_);
     if (state)
     {
         printGrid(*state, engine_.getGridConfig());
@@ -277,17 +269,7 @@ bool EngineController::isFinished() const
 
 bool EngineController::checkBreakpoints() const
 {
-    const SimulationState* state = nullptr;
-
-    if (isRunning_)
-    {
-        state = snapshot_.getLast();
-    }
-    else
-    {
-        state = snapshot_.get(currentTick_);
-    }
-
+    const SimulationState* state = snapshot_.get(currentTick_);
     if (!state)
     {
         return false;
