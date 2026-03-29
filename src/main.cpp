@@ -62,13 +62,16 @@ int main()
     // ---------------------------
     while (true)
     {
+        size_t tick = 0;
+
         if (controller.isFinished())
         {
+            controller.quit();
             std::cout << "All robots reached their goals.\nSimulation ended.\n";
             break;
         }
 
-        std::cout << "Commands: [n]ext, [b]ack, [r]un, [p]ause, [q]uit: ";
+        std::cout << "Commands: [n]ext, [b]ack, [r]un, [p]ause, [j]ump, [q]uit: ";
         char cmd;
         std::cin >> cmd;
 
@@ -94,6 +97,25 @@ int main()
         case 'p':
             controller.pause();
             break;
+
+        case 'j':
+        {
+            std::cout << "Enter tick to jump to: ";
+            std::cin >> tick;
+            controller.jumpToTick(tick);
+            
+            if (controller.getCurrentTick() == tick)
+            {
+                std::cout << "Successfully jumped to tick " << tick << ".\n";
+            }
+            else
+            {
+                std::cout << "Jump interrupted at tick "  << controller.getCurrentTick() 
+                          << " (breakpoint hit)\n";
+            }
+            
+            break;
+        }
         
         default:
             std::cout << "Invalid command!\n" << std::endl;

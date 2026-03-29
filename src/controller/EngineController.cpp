@@ -6,11 +6,11 @@
 
 
 // TODO: move to GUI layer when switching to graphical rendering
-void printGrid(const SimulationState& state, const GridConfig& grid)
+void printGrid(const SimulationState& state, const GridConfig& grid, size_t tick)
 {
     // std::system("clear"); 
     std::cout << "Robotics Simulation Debugger - Console MVP\n";
-    std::cout << "Tick: " << state.tick << "\n\n";
+    std::cout << "Tick: " << tick << "\n\n";
 
     for (int y = 0; y < grid.height; ++y)
     {
@@ -19,20 +19,18 @@ void printGrid(const SimulationState& state, const GridConfig& grid)
             Position pos{x, y};
             bool printed = false;
 
-            // Robots
             for (size_t i = 0; i < state.robots.size(); ++i)
             {
-                const auto& robot = state.robots[i];
-                if (robot.position == pos)
+                if (state.robots[i].position == pos)
                 {
                     std::cout << "R" << i + 1 << " ";
                     printed = true;
                     break;
                 }
             }
+
             if (printed) continue;
 
-            // Static obstacles
             for (const auto& obst : grid.static_obstacles)
             {
                 if (obst == pos)
@@ -42,9 +40,9 @@ void printGrid(const SimulationState& state, const GridConfig& grid)
                     break;
                 }
             }
+
             if (printed) continue;
 
-            // Dynamic obstacles
             for (const auto& dyn : state.dynamic_obstacles)
             {
                 if (dyn == pos)
@@ -54,23 +52,24 @@ void printGrid(const SimulationState& state, const GridConfig& grid)
                     break;
                 }
             }
+
             if (printed) continue;
 
-            // Goals
             for (size_t i = 0; i < state.robots.size(); ++i)
             {
-                const auto& robot = state.robots[i];
-                if (robot.goal == pos)
+                if (state.robots[i].goal == pos)
                 {
                     std::cout << "G" << i + 1 << " ";
                     printed = true;
                     break;
                 }
             }
+
             if (printed) continue;
 
             std::cout << ". ";
         }
+
         std::cout << "\n";
     }
 
@@ -96,7 +95,6 @@ EngineController::EngineController(SimulationEngine& engine, SnapshotManager& sn
 
 EngineController::~EngineController()
 {
-    // Ensure simulation thread exits safely before destruction
     quit();
 
     if (simulationThread_.joinable())
@@ -108,9 +106,10 @@ EngineController::~EngineController()
 
 // /************ GET CURRENT TICK ***************/
 
-size_t EngineController::getCurrentTick() const 
-{ 
-    return currentTick_; 
+size_t EngineController::getCurrentTick() const
+{
+    std::lock_guard<std::mutex> lock(mtx_);
+    return engine_.getCurrentState().tick;
 }
 
 
@@ -122,28 +121,38 @@ void EngineController::simulationLoop()
 
     while (true)
     {
-        // Wait until running or quitting
         cv_.wait(lock, [this]() { return isRunning_ || quitRequested_; });
 
         if (quitRequested_)
+        {
             break;
+        }
+
+        isStepping_ = true;
+
+        lock.unlock();
+        engine_.runTick();
+        lock.lock();
+
+        syncToTick(engine_.getCurrentState().tick);
 
         if (engine_.allRobotsReached())
         {
             isRunning_ = false;
-            cv_.notify_all(); 
-            continue; 
-        }
+            quitRequested_ = true;
+            cv_.notify_all();
 
-        engine_.runTick();
-        ++currentTick_;
-        updateGUI();
+            break;
+        }
 
         if (checkBreakpoints())
         {
             isRunning_ = false;
-            std::cout << "[Simulation paused due to breakpoint at tick " << currentTick_ << "]\n";
+            std::cout << "[Simulation paused due to breakpoint at tick " << engine_.getCurrentState().tick << "]\n";
         }
+
+        isStepping_ = false;
+        cv_.notify_all();
 
         lock.unlock();
         std::this_thread::sleep_for(std::chrono::milliseconds(500));
@@ -159,9 +168,10 @@ void EngineController::run()
     {
         std::lock_guard<std::mutex> lock(mtx_);
 
-        if (currentTick_ + 1 < snapshot_.getSize())
+        size_t currentTick = engine_.getCurrentState().tick;
+        if (currentTick + 1 < snapshot_.getSize())
         {
-            snapshot_.removeFutureSnapshots(currentTick_ + 1); 
+            snapshot_.removeFutureSnapshots(currentTick + 1);
         }
 
         isRunning_ = true;
@@ -176,14 +186,11 @@ void EngineController::run()
 
 void EngineController::pause()
 {
-    {
-        std::lock_guard<std::mutex> lock(mtx_);
-        isRunning_ = false;
+    std::lock_guard<std::mutex> lock(mtx_);
+    isRunning_ = false;
 
-        currentTick_ = snapshot_.getSize() - 1;
-    }
-
-    cv_.notify_all();
+    size_t lastTick = snapshot_.getSize() - 1;
+    syncToTick(lastTick);
 }
 
 
@@ -194,18 +201,21 @@ void EngineController::stepForward()
     std::unique_lock<std::mutex> lock(mtx_);
     isRunning_ = false;
 
-    if (currentTick_ + 1 < snapshot_.getSize())
+    size_t nextTick = engine_.getCurrentState().tick + 1;
+    if (nextTick < snapshot_.getSize())
     {
-        ++currentTick_;
-        engine_.setCurrentState(*snapshot_.get(currentTick_));
+        syncToTick(nextTick);
     }
     else
     {
+        lock.unlock();
         engine_.runTick();
-        ++currentTick_;
+        lock.lock();
+
+        syncToTick(nextTick);
     }
 
-    updateGUI();
+    cv_.notify_all();
 }
 
 
@@ -216,17 +226,19 @@ void EngineController::stepBack()
     std::unique_lock<std::mutex> lock(mtx_);
     isRunning_ = false;
 
-    if (currentTick_ > 0)
+    size_t currentTick = engine_.getCurrentState().tick;
+
+    if (currentTick == 0)
     {
-        --currentTick_;
-        const SimulationState* state = snapshot_.get(currentTick_);
-        if (state)
-        {
-            engine_.setCurrentState(*state);
-        }
+        return;
     }
 
-    updateGUI();
+    size_t newTick = currentTick - 1;
+    syncToTick(newTick);
+
+    snapshot_.removeFutureSnapshots(newTick + 1);
+
+    cv_.notify_all();
 }
 
 
@@ -234,10 +246,12 @@ void EngineController::stepBack()
 
 void EngineController::updateGUI()
 {
-    const SimulationState* state = snapshot_.get(currentTick_);
+    size_t tick = engine_.getCurrentState().tick;
+
+    const SimulationState* state = snapshot_.get(tick);
     if (state)
     {
-        printGrid(*state, engine_.getGridConfig());
+        printGrid(*state, engine_.getGridConfig(), tick);
     }
 }
 
@@ -269,13 +283,15 @@ bool EngineController::isFinished() const
 
 bool EngineController::checkBreakpoints() const
 {
-    const SimulationState* state = snapshot_.get(currentTick_);
+    size_t tick = engine_.getCurrentState().tick;
+
+    const SimulationState* state = snapshot_.get(tick);
     if (!state)
     {
         return false;
     }
 
-    return breakpointManager_.shouldBreak(*state, currentTick_);
+    return breakpointManager_.shouldBreak(*state, tick);
 }
 
 
@@ -284,4 +300,75 @@ bool EngineController::checkBreakpoints() const
 BreakpointManager& EngineController::getBreakpointManager()
 {
     return breakpointManager_;
+}
+
+
+// /************** SYNC TO TICK ***************/
+
+void EngineController::syncToTick(size_t tick)
+{
+    const SimulationState* state = snapshot_.get(tick);
+    if (!state) 
+    {
+        return;
+    }
+
+    SimulationState synced = *state;
+    synced.tick = tick;
+
+    engine_.setCurrentState(synced);
+
+    updateGUI();
+}
+
+
+// /************** JUMP TO TICK ***************/
+
+bool EngineController::jumpToTick(size_t targetTick)
+{
+    std::unique_lock<std::mutex> lock(mtx_);
+
+    isRunning_ = false;
+    cv_.notify_all();
+
+    cv_.wait(lock, [this]() { return !isStepping_; });
+
+    if (targetTick >= snapshot_.getCapacity())
+    {
+        return false;
+    }
+
+    if (targetTick < snapshot_.getSize())
+    {
+        syncToTick(targetTick);
+        snapshot_.removeFutureSnapshots(targetTick + 1);
+
+        return true;
+    }
+
+    while (engine_.getCurrentState().tick < targetTick)
+    {
+        lock.unlock();
+        engine_.runTick();
+        lock.lock();
+
+        size_t tick = engine_.getCurrentState().tick;
+
+        const SimulationState* state = snapshot_.get(tick);
+        if (!state)
+        {
+            snapshot_.save(engine_.getCurrentState());
+        }
+
+        syncToTick(tick);
+
+        if (checkBreakpoints())
+        {
+            return false;
+        }
+    }
+
+    syncToTick(engine_.getCurrentState().tick);
+
+    return true;
 }
