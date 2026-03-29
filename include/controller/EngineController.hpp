@@ -23,7 +23,6 @@ private:
 
     SimulationEngine& engine_;    // The simulation engine
     SnapshotManager& snapshot_;   // The snapshot manager (access via EngineController)
-    size_t currentTick_ = 0;      // The current tick of the simulation
 
     std::atomic<bool> isRunning_ = false;      // Indicates whether the simulation is currently advancing automatically.
     std::atomic<bool> quitRequested_ = false;  // Signals the simulation thread to terminate.
@@ -33,6 +32,8 @@ private:
     std::condition_variable cv_;  // Condition variable for thread synchronization.
 
     BreakpointManager breakpointManager_;  // Manages breakpoints for tick and robot mode.
+    bool isStepping_ = false;              // Indicates whether the simulation is currently stepping.
+    
 
 public:
     /**
@@ -90,6 +91,22 @@ public:
      */
     BreakpointManager& getBreakpointManager();
 
+    /**
+     * @brief Jump immediately to a specific tick in the simulation.
+     *
+     * This function attempts to move the simulation to the specified tick (`targetTick`).
+     * If a snapshot for the target tick exists, it will load that snapshot directly.
+     * If no snapshot exists for the given tick, the simulation will advance forward 
+     * from the current tick until the target tick is reached, storing snapshots at each step.
+     *
+     * @param targetTick The tick to jump to.
+     * 
+     * @return True if the jump was successful (either by loading a snapshot or advancing the 
+     *         simulation), false if the targetTick is out of range and cannot be reached (either due
+     *         to snapshot constraints or simulation limits).       
+     */
+    bool jumpToTick(size_t targetTick);
+
 private:
 
     // Main simulation loop executed by `simulationThread_`.
@@ -101,4 +118,16 @@ private:
      * @return True if a breakpoint condition is met, false otherwise.
      */
     bool checkBreakpoints() const;
+
+    /**
+     * @brief Synchronizes the simulation engine to a specific tick.
+     *
+     * This function updates the engine's current state to match the snapshot
+     * corresponding to the given tick. It ensures that the simulation state,
+     * including all robots and dynamic obstacles, reflects exactly the snapshot
+     * at that moment in time.
+     *
+     * @param tick The target simulation tick to synchronize to.
+     */
+    void syncToTick(size_t tick);
 };

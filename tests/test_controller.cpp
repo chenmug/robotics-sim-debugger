@@ -4,6 +4,7 @@
 #include "robots/GridRobot.hpp"
 #include "planners/AStarPlanner.hpp"
 #include "controller/EngineController.hpp"
+#include "controller/BreakpointManager.hpp"
 
 
 // Helper to create a SimulationEngine with one GridRobot
@@ -182,4 +183,42 @@ TEST(EngineController, StepForwardCreatesSnapshotIfMissing)
 
     EXPECT_EQ(snapshots.getSize(), 1u); 
     EXPECT_EQ(engine.getCurrentState().robots[0].position, snapshots.getLast()->robots[0].position);
+}
+
+
+// ========================
+// Tests for jumpToTick 
+// ========================
+
+TEST(EngineController, JumpToTickWithSnapshot)
+{
+    GridConfig grid{10, 10, {{2, 2}, {5, 5}}};
+    SimulationEngine engine(grid);
+    EngineController controller(engine, engine.getSnapshotManager());
+    
+    EXPECT_TRUE(controller.jumpToTick(5));
+    EXPECT_EQ(controller.getCurrentTick(), 5);
+}
+
+
+TEST(EngineController, JumpToTickWithoutSnapshot)
+{
+    GridConfig grid{10, 10, {{2, 2}, {5, 5}}};
+    SimulationEngine engine(grid);
+    EngineController controller(engine, engine.getSnapshotManager());
+    
+    EXPECT_FALSE(controller.jumpToTick(1001));
+}
+
+
+TEST(EngineController, JumpToTickWithBreakpoint)
+{
+    GridConfig grid{10, 10, {{2, 2}, {5, 5}}};
+    SimulationEngine engine(grid);
+    EngineController controller(engine, engine.getSnapshotManager());
+    
+    controller.getBreakpointManager().addTickBreakpoint(3);
+    
+    EXPECT_FALSE(controller.jumpToTick(5));
+    EXPECT_EQ(controller.getCurrentTick(), 3);
 }

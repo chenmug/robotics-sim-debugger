@@ -51,6 +51,14 @@ size_t SnapshotManager::getSize() const noexcept
 }
 
 
+/*************** GET CAPACITY ****************/
+
+size_t SnapshotManager::getCapacity() const noexcept
+{
+    return snapshots_.capacity();
+}
+
+
 /*************** CAN STEP BACK ****************/
 
 bool SnapshotManager::canStepBack(size_t currentTick) const

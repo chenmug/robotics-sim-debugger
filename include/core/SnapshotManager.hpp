@@ -81,6 +81,13 @@ public:
     size_t getSize() const noexcept;
 
     /**
+     * @brief Get the capacity of the snapshots vector.
+     * 
+     * @return The capacity of the snapshots vector.
+     */
+    size_t getCapacity() const noexcept;
+
+    /**
      * @brief Check whether stepping back in time is possible.
      *
      * @param currentTick Current simulation tick.
