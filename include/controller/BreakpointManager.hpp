@@ -52,6 +52,17 @@ public:
     size_t addRobotBreakpoint(size_t robotId, RobotMode mode);
 
     /**
+     * @brief Add an event-based breakpoint.
+     *
+     * The simulation will pause when any of the specified events occur.
+     *
+     * @param triggers Vector of EventType values that trigger the breakpoint.
+     * 
+     * @return The unique ID of the newly created breakpoint.
+     */
+    size_t addEventBreakpoint(const std::vector<EventType>& triggers);
+
+    /**
      * @brief Remove a breakpoint by its unique ID.
      *
      * @param breakpointID Breakpoint ID to remove.

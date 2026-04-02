@@ -2,6 +2,7 @@
 #include "controller/BreakpointManager.hpp"
 #include "controller/TickBreakpoint.hpp"
 #include "controller/RobotModeBreakpoint.hpp"
+#include "controller/EventBasedBreakpoint.hpp"
 
 
 // /*********** ADD TICK BREAKPOINT ***********/
@@ -43,6 +44,28 @@ size_t BreakpointManager::addRobotBreakpoint(size_t robotId, RobotMode mode)
     }
 
     breakpoints_.push_back(std::make_unique<RobotModeBreakpoint>(id, robotId, mode));
+
+    return id;
+}
+
+
+// /*********** ADD EVENT BREAKPOINT ***********/
+
+size_t BreakpointManager::addEventBreakpoint(const std::vector<EventType>& triggers)
+{
+    size_t id = 0;
+
+    if (!removedIDs_.empty())
+    {
+        id = removedIDs_.front();
+        removedIDs_.pop();
+    }
+    else
+    {
+        id = nextBreakpointID_++;
+    }
+
+    breakpoints_.push_back(std::make_unique<EventBasedBreakpoint>(id, triggers));
 
     return id;
 }
