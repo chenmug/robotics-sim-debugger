@@ -47,7 +47,7 @@ void GridRobot::sense(const SimulationState& state)
     syncWithState(state);
     sensorDataCache_.clear();  // Clear previous sensor readings
 
-    std::cout << "[Tick " << state.tick << "] Robot " << id_ << " sensing...\n";
+    std::cout << "[Tick " << state.tick << "] Robot " << id_ + 1 << " sensing...\n";
 
     for (auto& sensor : sensors_)
     {
@@ -132,6 +132,46 @@ void GridRobot::act(SimulationState& state)
     {
         self.mode = RobotMode::IDLE;
         mode_ = self.mode;
+    }
+}
+
+
+/**************** ADD EVENTS *****************/
+
+void GridRobot::addEvents(SimulationState& state) const
+{
+    size_t i = getID();
+
+    // Check if goal reached
+    if (currentPos_ == goal_)
+    {
+        state.events.push_back({EventType::GOAL_REACHED, i, state.tick});
+        return;
+    }
+
+    // Check collisions
+    for (size_t j = 0; j < state.robots.size(); ++j) 
+    {
+        if (i != j && state.robots[j].position == state.robots[i].position) 
+        {
+            state.events.push_back({EventType::COLLISION_DETECTED, i, state.tick});
+        }
+    }
+
+    // Check obstacles
+    for (const auto& data : sensorDataCache_) 
+    {
+        if (!data.positions.empty()) 
+        {
+            state.events.push_back({EventType::OBSTACLE_DETECTED, i, state.tick});
+            break;
+        }
+    }
+
+    // Check replan
+    if (state.robots[i].planned_path != planned_path_cache_) 
+    {
+        state.events.push_back({EventType::REPLAN_TRIGGERED, i, state.tick});
     }
 }
 

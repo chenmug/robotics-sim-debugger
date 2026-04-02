@@ -51,7 +51,8 @@ enum class EventType
 {
     OBSTACLE_DETECTED,   // A robot detected an obstacle
     REPLAN_TRIGGERED,    // A robot triggered path replanning
-    COLLISION_DETECTED   // A collision between robots or obstacles occurred
+    COLLISION_DETECTED,  // A collision between robots or obstacles occurred
+    GOAL_REACHED         // A robot reached his goal
 };
 
 /**

@@ -113,6 +113,17 @@ public:
      */
     virtual void syncWithState(const SimulationState& state) = 0;
 
+    /**
+     * @brief Adds events related to the robot's actions or environment during the 
+     *        current simulation tick.
+     * 
+     * This method allows the robot to generate and record events such as obstacle detection,
+     * path replanning, or collisions that occur during the simulation.
+     *
+     * @param state The current global simulation state.
+     */
+    virtual void addEvents(SimulationState& state) const = 0;
+
     // Virtual destructor for proper cleanup of derived classes
     virtual ~Robot() = default;
 };

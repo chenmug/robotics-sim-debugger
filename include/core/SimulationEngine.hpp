@@ -123,4 +123,12 @@ public:
      * @return reference to SnapshotManager
      */
     SnapshotManager& getSnapshotManager();
+
+    /**
+     * @brief Process all robot events and add the events in the current state.
+     * 
+     * This function adds events related to the robot's actions or environment during the 
+     * current simulation tick.
+     */
+    void processEvents();
 };

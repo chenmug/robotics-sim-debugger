@@ -80,6 +80,13 @@ public:
      */
     void syncWithState(const SimulationState& state) override;
 
+    /**
+     * @brief Adds events related to the robot's actions or environment during the 
+     *        current simulation tick.
+     *
+     * @param state Current simulation state.
+     */
+    void addEvents(SimulationState& state) const override;
 
     /**
      * @brief Check if the robot has reached its goal.

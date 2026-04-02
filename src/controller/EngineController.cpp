@@ -2,7 +2,30 @@
 #include <thread>
 #include <chrono>
 #include <iostream>
+#include <string>
 
+
+// TODO: move to GUI layer when switching to graphical rendering
+// Helper: Converts an EventType enum to a human-readable string
+inline std::string eventTypeToString(EventType type)
+{
+    switch(type)
+    {
+        case EventType::OBSTACLE_DETECTED: 
+            return "ObstacleDetected";
+
+        case EventType::REPLAN_TRIGGERED:  
+            return "ReplanTriggered";
+
+        case EventType::COLLISION_DETECTED: 
+            return "CollisionDetected";
+
+        case EventType::GOAL_REACHED:
+            return "GoalReached";
+
+        default: return "UnknownEvent";
+    }
+}
 
 
 // TODO: move to GUI layer when switching to graphical rendering
@@ -74,6 +97,19 @@ void printGrid(const SimulationState& state, const GridConfig& grid, size_t tick
     }
 
     std::cout << "\n";
+
+    // Print events for this tick
+    if (!state.events.empty())
+    {
+        std::cout << "Events:\n";
+        for (const auto& event : state.events)
+        {
+            std::cout << " [Event] Robot " << event.robotId + 1
+                      << " triggered " << eventTypeToString(event.type) 
+                      << " at tick " << event.tick << "\n";
+        }
+        std::cout << "\n";
+    }
 }
 
 

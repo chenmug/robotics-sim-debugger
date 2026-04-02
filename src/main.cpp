@@ -5,7 +5,9 @@
 #include "planners/DijkstraPlanner.hpp"
 #include "planners/BFSPlanner.hpp"
 #include "controller/BreakpointManager.hpp"
+#include "controller/EventBasedBreakpoint.hpp"
 #include <iostream>
+
 
 
 // ======================================
@@ -33,9 +35,15 @@ int main()
     auto robot2 = std::make_unique<GridRobot>(grid, planner2);
     auto robot3 = std::make_unique<GridRobot>(grid, planner3);
 
+    // Robot 4 – for collision testing
+    auto planner4 = std::make_shared<AStarPlanner>();
+    auto robot4 = std::make_unique<GridRobot>(grid, planner4);
+
     engine.addRobot(std::move(robot1), {0,0}, {9,9});
     engine.addRobot(std::move(robot2), {0,4}, {4,0});
     engine.addRobot(std::move(robot3), {9,0}, {0,9});
+
+    engine.addRobot(std::move(robot4), {1,0}, {4,4});
 
     // Save initial state
     engine.getSnapshotManager().save(engine.getCurrentState());
@@ -54,6 +62,10 @@ int main()
 
     // Pause when robot 1 enters IDLE mode
     controller.getBreakpointManager().addRobotBreakpoint(0, RobotMode::IDLE);
+
+    // Pause when certain events occur (event-based breakpoint)
+    std::vector<EventType> triggerEvents = { EventType::COLLISION_DETECTED};
+    controller.getBreakpointManager().addEventBreakpoint(triggerEvents);
 
     controller.updateGUI();
 

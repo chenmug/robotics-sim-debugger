@@ -1,5 +1,4 @@
 #include "core/SimulationEngine.hpp" 
-#include <stdexcept>  // For std::runtime_error
 
 
 /**************** CONSTRUCTOR ****************/
@@ -17,11 +16,6 @@ void SimulationEngine::addRobot(std::unique_ptr<Robot> robot, Position start_pos
 {
     const size_t id = current_state.robots.size();
     robot->setID(id);  // Assign unique ID to the robot before adding to engine
-
-    if (!isWithinBounds(start_pos) || !isWithinBounds(goal_pos))
-    {
-        throw std::runtime_error("Robot position outside grid bounds");
-    }
     
     // Initialize robot state
     RobotState state;
@@ -42,6 +36,7 @@ void SimulationEngine::addRobot(std::unique_ptr<Robot> robot, Position start_pos
 void SimulationEngine::runTick()
 {
     ++current_state.tick;
+    current_state.events.clear();
     
     for (auto& robot : robots)
     {
@@ -62,6 +57,8 @@ void SimulationEngine::runTick()
     {
         current_state.robots[i].mode = robots[i]->getMode();
     }
+
+    processEvents(); 
 
     snapshotManager_.save(current_state);
 }
@@ -133,4 +130,15 @@ size_t SimulationEngine::getRobotCount() const
 SnapshotManager& SimulationEngine::getSnapshotManager() 
 {
     return snapshotManager_;
+}
+
+
+/************ PROCESS EVENTS **************/
+
+void SimulationEngine::processEvents()
+{
+    for (const auto& robot : robots) 
+    {
+        robot->addEvents(current_state);
+    }
 }
