@@ -131,4 +131,16 @@ public:
      * current simulation tick.
      */
     void processEvents();
+
+    /**
+     * @brief Detects potential collisions between robots based on their planned next positions.
+     *
+     * This function checks for conflicts where two or more robots intend to move
+     * into the same grid cell during the current simulation tick.
+     *
+     * The detection is performed after all robots have completed their planning phase
+     * and before any movement (act phase) is executed, ensuring a consistent view
+     * of all intended actions.
+     */
+    void detectCollisions();
 };

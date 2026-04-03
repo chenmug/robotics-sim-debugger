@@ -27,6 +27,7 @@ int main()
     auto planner1 = std::make_shared<AStarPlanner>();
     auto planner2 = std::make_shared<DijkstraPlanner>();
     auto planner3 = std::make_shared<BFSPlanner>();
+    auto planner4 = std::make_shared<AStarPlanner>();
 
     // ---------------------------
     // Robots
@@ -34,15 +35,11 @@ int main()
     auto robot1 = std::make_unique<GridRobot>(grid, planner1);
     auto robot2 = std::make_unique<GridRobot>(grid, planner2);
     auto robot3 = std::make_unique<GridRobot>(grid, planner3);
-
-    // Robot 4 – for collision testing
-    auto planner4 = std::make_shared<AStarPlanner>();
     auto robot4 = std::make_unique<GridRobot>(grid, planner4);
 
     engine.addRobot(std::move(robot1), {0,0}, {9,9});
     engine.addRobot(std::move(robot2), {0,4}, {4,0});
     engine.addRobot(std::move(robot3), {9,0}, {0,9});
-
     engine.addRobot(std::move(robot4), {1,0}, {4,4});
 
     // Save initial state

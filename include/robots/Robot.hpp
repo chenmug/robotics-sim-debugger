@@ -118,7 +118,7 @@ public:
      *        current simulation tick.
      * 
      * This method allows the robot to generate and record events such as obstacle detection,
-     * path replanning, or collisions that occur during the simulation.
+     * path replanning, or reached goal that occur during the simulation.
      *
      * @param state The current global simulation state.
      */

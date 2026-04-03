@@ -141,21 +141,13 @@ void GridRobot::act(SimulationState& state)
 void GridRobot::addEvents(SimulationState& state) const
 {
     size_t i = getID();
+    const Position& myNextPos = state.robots[i].nextPlannedPos;
 
     // Check if goal reached
     if (currentPos_ == goal_)
     {
         state.events.push_back({EventType::GOAL_REACHED, i, state.tick});
         return;
-    }
-
-    // Check collisions
-    for (size_t j = 0; j < state.robots.size(); ++j) 
-    {
-        if (i != j && state.robots[j].position == state.robots[i].position) 
-        {
-            state.events.push_back({EventType::COLLISION_DETECTED, i, state.tick});
-        }
     }
 
     // Check obstacles

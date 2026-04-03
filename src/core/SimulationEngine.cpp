@@ -48,6 +48,9 @@ void SimulationEngine::runTick()
         robot->plan(current_state);
     }
 
+    detectCollisions();
+    processEvents(); 
+
     for (auto& robot : robots)
     {
         robot->act(current_state);
@@ -57,8 +60,6 @@ void SimulationEngine::runTick()
     {
         current_state.robots[i].mode = robots[i]->getMode();
     }
-
-    processEvents(); 
 
     snapshotManager_.save(current_state);
 }
@@ -140,5 +141,23 @@ void SimulationEngine::processEvents()
     for (const auto& robot : robots) 
     {
         robot->addEvents(current_state);
+    }
+}
+
+
+/********** DETECTED COLLISION ************/
+
+void SimulationEngine::detectCollisions()
+{
+    for (size_t i = 0; i < robots.size(); ++i)
+    {
+        for (size_t j = i + 1; j < robots.size(); ++j)
+        {
+            if (current_state.robots[i].nextPlannedPos ==
+                current_state.robots[j].nextPlannedPos)
+            {
+                current_state.events.push_back({EventType::COLLISION_DETECTED, i, current_state.tick});
+            }
+        }
     }
 }
