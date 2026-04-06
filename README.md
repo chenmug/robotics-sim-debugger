@@ -58,8 +58,8 @@ This project explores how to transform a simulation into a **deterministic, insp
 - Enables:
   - Step forward  
   - Step backward  
-  - Replay from initial state (in progress)  
-  - Jump to arbitrary tick (planned)  
+  - Replay from initial state 
+  - Jump to arbitrary tick
 
 This allows debugging not only the current state, but also **past system behavior**.
 
