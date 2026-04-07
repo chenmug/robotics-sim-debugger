@@ -2,20 +2,12 @@
 #include "core/SimulationState.hpp"  // Forward Declaration
 #include "core/SnapshotManager.hpp"  // Forward Declaration
 #include "robots/Robot.hpp"          // Forward Declaration
+#include "planners/Planner.hpp"      // Forward Declaration
+#include "core/GridConfig.hpp"       // Forward Declaration
+#include "core/ConflictResolver.hpp" // Forward Declaration
 #include <vector>                    // For std::vector
 #include <memory>                    // For std::unique_ptr
 
-/**
- * @brief Configuration for the simulation grid.
- * 
- * Defines the size of the grid and positions of static obstacles.
- */
-struct GridConfig 
-{
-    int width;                              // Width of the grid
-    int height;                             // Height of the grid
-    std::vector<Position> static_obstacles; // Positions of obstacles that cannot move
-};
 
 /**
  * @brief Core simulation engine that manages the simulation tick loop.
@@ -27,10 +19,11 @@ struct GridConfig
 class SimulationEngine 
 {
 private:
-    SimulationState current_state;               // Current simulation state
-    GridConfig grid_;                            // Grid configuration
-    std::vector<std::unique_ptr<Robot>> robots;  // All robots in the simulation
-    SnapshotManager snapshotManager_;            // Stores snapshots for debugging / replay
+    SimulationState current_state;                        // Current simulation state
+    GridConfig grid_;                                     // Grid configuration
+    std::vector<std::unique_ptr<Robot>> robots;           // All robots in the simulation
+    SnapshotManager snapshotManager_;                     // Stores snapshots for debugging / replay
+    std::unique_ptr<ConflictResolver> conflictResolver_;  // Resolve conflicts between the robots
 
 public:
     /**
@@ -92,14 +85,6 @@ public:
     const GridConfig& getGridConfig() const;
 
     /**
-     * @brief Check if a position is within the grid boundaries.
-     * @param pos The position to check.
-     *
-     * @return True if the position is in the grid boundaries, false otherwise.
-     */
-    bool isWithinBounds(const Position& pos) const;
-
-    /**
      * @brief Checks if all robots reached their goals.
      * 
      * @return True if all robots reached their goals, false otherwise.
@@ -131,16 +116,4 @@ public:
      * current simulation tick.
      */
     void processEvents();
-
-    /**
-     * @brief Detects potential collisions between robots based on their planned next positions.
-     *
-     * This function checks for conflicts where two or more robots intend to move
-     * into the same grid cell during the current simulation tick.
-     *
-     * The detection is performed after all robots have completed their planning phase
-     * and before any movement (act phase) is executed, ensuring a consistent view
-     * of all intended actions.
-     */
-    void detectCollisions();
 };

@@ -1,4 +1,5 @@
 #include "core/SimulationEngine.hpp" 
+#include <iostream>
 
 
 /**************** CONSTRUCTOR ****************/
@@ -48,13 +49,14 @@ void SimulationEngine::runTick()
         robot->plan(current_state);
     }
 
-    detectCollisions();
-    processEvents(); 
+    conflictResolver_->resolve(current_state, grid_);
 
     for (auto& robot : robots)
     {
         robot->act(current_state);
     }
+
+    processEvents(); 
 
     for (size_t i = 0; i < robots.size(); ++i) 
     {
@@ -91,14 +93,6 @@ const SimulationState& SimulationEngine::getCurrentState() const
 const GridConfig& SimulationEngine::getGridConfig() const
 {
     return grid_;
-}
-
-
-/************* IS VALID POSITION ************/
-
-bool SimulationEngine::isWithinBounds(const Position& pos) const
-{
-    return pos.x >= 0 && pos.x < grid_.width && pos.y >= 0 && pos.y < grid_.height;
 }
 
 
@@ -141,23 +135,5 @@ void SimulationEngine::processEvents()
     for (const auto& robot : robots) 
     {
         robot->addEvents(current_state);
-    }
-}
-
-
-/********** DETECTED COLLISION ************/
-
-void SimulationEngine::detectCollisions()
-{
-    for (size_t i = 0; i < robots.size(); ++i)
-    {
-        for (size_t j = i + 1; j < robots.size(); ++j)
-        {
-            if (current_state.robots[i].nextPlannedPos ==
-                current_state.robots[j].nextPlannedPos)
-            {
-                current_state.events.push_back({EventType::COLLISION_DETECTED, i, current_state.tick});
-            }
-        }
     }
 }
