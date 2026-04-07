@@ -35,31 +35,23 @@ bool Planner::isBlocked(const Position& pos, const SimulationState& state,
             continue;
         }
 
-        // Robot current position
-        if (other.position == pos)
+        // Determine if the other robot is planning to move this tick
+        bool otherWillMove = (other.nextPlannedPos != other.position);
+
+        // Block only if the other robot is actually staying in place
+        if (other.position == pos && !otherWillMove)
         {
             return true;
         }
 
-        if (other.nextPlannedPos == pos)
+        // Block the robot if a higher-priority robot plans to move into this cell
+        if (other.id < self_id && otherWillMove && other.nextPlannedPos == pos)
         {
-            // Priority rule: lower ID wins
-            if (other.id < self_id)
-            {
-                return true;
-            }
+            return true;
         }
     }
 
     return false;
-}
-
-
-/************* IS WITHIN BOUNDS *************/
-
-bool Planner::isWithinBounds(const Position& pos, const GridConfig& grid) const
-{
-    return pos.x >= 0 && pos.x < grid.width && pos.y >= 0 && pos.y < grid.height;
 }
 
 

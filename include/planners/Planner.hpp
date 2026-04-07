@@ -13,10 +13,6 @@ struct GridConfig;
  */
 class Planner
 {
-protected:
-    // 4-directional move offsets: up, right, down, left
-    const std::vector<Position> directions_ = {{0,1}, {1,0}, {0,-1}, {-1,0}};
-
 public:
 
     /**
@@ -59,15 +55,6 @@ protected:
      */
     bool isBlocked(const Position& pos, const SimulationState& state,
                    const GridConfig& grid, size_t self_id) const;
-
-    /**
-     * @brief Check if a position is within the grid boundaries.
-     * @param pos The position to check.
-     * @param grid Grid configuration.
-     *
-     * @return True if the position is in the grid boundaries, false otherwise.
-     */
-    bool isWithinBounds(const Position& pos, const GridConfig& grid) const;
 
     /**
      * @brief Hash a position to a unique non-negative integer.
