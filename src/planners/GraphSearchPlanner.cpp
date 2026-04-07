@@ -11,7 +11,7 @@ std::vector<Position> GraphSearchPlanner::computePath(const SimulationState& sta
     const Position goal  = robot.goal;
 
     // Check if start and goal is within bounds
-    if (!isWithinBounds(start, grid) || !isWithinBounds(goal, grid))
+    if (!grid.isWithinBounds(start) || !grid.isWithinBounds(goal))
     {
         return {};
     }
@@ -41,12 +41,12 @@ std::vector<Position> GraphSearchPlanner::computePath(const SimulationState& sta
         }
 
         // Explore neighbors (4 directions)
-        for (const auto& dir : directions_)
+        for (const auto& dir : grid.getDirections())
         {
             Position neighbor{current.pos.x + dir.x, current.pos.y + dir.y};
             
             // Skip neighbor if it's out of bounds or blocked
-            if (!isWithinBounds(neighbor, grid) || isBlocked(neighbor, state, grid, robot.id))
+            if (!grid.isWithinBounds(neighbor) || isBlocked(neighbor, state, grid, robot.id))
             {
                 continue;
             }

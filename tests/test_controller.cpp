@@ -5,6 +5,7 @@
 #include "planners/AStarPlanner.hpp"
 #include "controller/EngineController.hpp"
 #include "controller/BreakpointManager.hpp"
+#include "controller/EventBasedBreakpoint.hpp"
 
 
 // Helper to create a SimulationEngine with one GridRobot
@@ -62,8 +63,6 @@ TEST(EngineController, StepForwardAndBack)
     // Step forward to tick 2
     controller.stepForward();
     Position posAfterStep4 = engine.getCurrentState().robots[0].position;
-
-    // --- Assertions ---
 
     // Snapshots exist
     const SimulationState* tick0 = snapshots.get(0);
@@ -221,4 +220,141 @@ TEST(EngineController, JumpToTickWithBreakpoint)
     
     EXPECT_FALSE(controller.jumpToTick(5));
     EXPECT_EQ(controller.getCurrentTick(), 3);
+}
+
+
+// ============================
+// EventBasedBreakpoint Tests
+// ============================
+
+TEST(EventBasedBreakpoint, TriggersOnObstacleDetected)
+{
+    GridConfig grid{5,5};
+    SimulationEngine engine = makeEngineWithRobot({0,0}, {4,4}, grid);
+    EngineController controller(engine, engine.getSnapshotManager());
+
+    EventBasedBreakpoint evBP(0, {EventType::OBSTACLE_DETECTED});
+    controller.getBreakpointManager().addEventBreakpoint({EventType::OBSTACLE_DETECTED});
+
+    SimulationState state = engine.getCurrentState();
+    ASSERT_EQ(state.events.size(), 0u);
+
+    state.events.push_back({EventType::OBSTACLE_DETECTED});
+    
+    ASSERT_EQ(state.events.size(), 1u);
+    EXPECT_TRUE(evBP.shouldBreak(state, state.tick));
+}
+
+
+TEST(EventBasedBreakpoint, TriggersOnReplanTriggered)
+{
+    GridConfig grid{5,5};
+    SimulationEngine engine = makeEngineWithRobot({0,0}, {4,4}, grid);
+    EngineController controller(engine, engine.getSnapshotManager());
+
+    EventBasedBreakpoint evBP(0, {EventType::REPLAN_TRIGGERED});
+    controller.getBreakpointManager().addEventBreakpoint({EventType::REPLAN_TRIGGERED});
+
+    SimulationState state = engine.getCurrentState();
+    ASSERT_EQ(state.events.size(), 0u);
+
+    state.events.push_back({EventType::REPLAN_TRIGGERED});
+
+    ASSERT_EQ(state.events.size(), 1u);
+    EXPECT_TRUE(evBP.shouldBreak(state, state.tick));
+}
+
+
+TEST(EventBasedBreakpoint, TriggersOnCollisionDetected)
+{
+    GridConfig grid{5,5};
+    SimulationEngine engine(grid);
+
+    // Add two robots that could collide
+    auto r1 = std::make_unique<GridRobot>(grid, std::make_shared<AStarPlanner>());
+    auto r2 = std::make_unique<GridRobot>(grid, std::make_shared<AStarPlanner>());
+    engine.addRobot(std::move(r1), {0,0}, {2,2});
+    engine.addRobot(std::move(r2), {0,1}, {2,1});
+
+    EngineController controller(engine, engine.getSnapshotManager());
+
+    EventBasedBreakpoint evBP(0, {EventType::AVOID_COLLISION});
+    controller.getBreakpointManager().addEventBreakpoint({EventType::AVOID_COLLISION});
+
+    SimulationState state = engine.getCurrentState();
+    ASSERT_EQ(state.events.size(), 0u);
+
+    state.events.push_back({EventType::AVOID_COLLISION});
+
+    ASSERT_EQ(state.events.size(), 1u);
+    EXPECT_TRUE(evBP.shouldBreak(state, state.tick));
+}
+
+
+TEST(EventBasedBreakpoint, MultipleEventsSameTick)
+{
+    GridConfig grid{5,5};
+    SimulationEngine engine = makeEngineWithRobot({0,0}, {4,4}, grid);
+    EngineController controller(engine, engine.getSnapshotManager());
+
+    EventBasedBreakpoint evBP(0, {EventType::OBSTACLE_DETECTED, EventType::REPLAN_TRIGGERED});
+    controller.getBreakpointManager().addEventBreakpoint({EventType::OBSTACLE_DETECTED, EventType::REPLAN_TRIGGERED});
+
+    SimulationState state = engine.getCurrentState();
+    ASSERT_EQ(state.events.size(), 0u);
+
+    state.events.push_back({EventType::REPLAN_TRIGGERED});
+    ASSERT_EQ(state.events.size(), 1u);
+
+    state.events.push_back({EventType::OBSTACLE_DETECTED});
+
+    ASSERT_EQ(state.events.size(), 2u);
+    EXPECT_TRUE(evBP.shouldBreak(state, state.tick));
+}
+
+
+TEST(EventBasedBreakpoint, MultipleRobotsCollision)
+{
+    GridConfig grid{5,5};
+    SimulationEngine engine(grid);
+
+    auto r1 = std::make_unique<GridRobot>(grid, std::make_shared<AStarPlanner>());
+    auto r2 = std::make_unique<GridRobot>(grid, std::make_shared<AStarPlanner>());
+    engine.addRobot(std::move(r1), {0,0}, {4,4});
+    engine.addRobot(std::move(r2), {0,1}, {4,1});
+
+    EngineController controller(engine, engine.getSnapshotManager());
+
+    EventBasedBreakpoint evBP(0, {EventType::AVOID_COLLISION});
+    controller.getBreakpointManager().addEventBreakpoint({EventType::AVOID_COLLISION});
+
+    SimulationState state = engine.getCurrentState();
+    ASSERT_EQ(state.events.size(), 0u);
+
+    state.events.push_back({EventType::AVOID_COLLISION});
+    ASSERT_EQ(state.events.size(), 1u);
+
+    state.events.push_back({EventType::OBSTACLE_DETECTED}); 
+
+    ASSERT_EQ(state.events.size(), 2u);
+    EXPECT_TRUE(evBP.shouldBreak(state, state.tick));
+}
+
+
+TEST(EventBasedBreakpoint, DoesNotTriggerForOtherEvent)
+{
+    GridConfig grid{5,5};
+    SimulationEngine engine = makeEngineWithRobot({0,0}, {4,4}, grid);
+    EngineController controller(engine, engine.getSnapshotManager());
+
+    EventBasedBreakpoint evBP(0, {EventType::REPLAN_TRIGGERED});
+    controller.getBreakpointManager().addEventBreakpoint({EventType::REPLAN_TRIGGERED});
+
+    SimulationState state = engine.getCurrentState();
+    ASSERT_EQ(state.events.size(), 0u);
+
+    state.events.push_back({EventType::OBSTACLE_DETECTED}); // Different event
+
+    ASSERT_EQ(state.events.size(), 1u);
+    EXPECT_FALSE(evBP.shouldBreak(state, state.tick));
 }

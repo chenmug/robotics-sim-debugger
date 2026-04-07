@@ -47,7 +47,7 @@ void GridRobot::sense(const SimulationState& state)
     syncWithState(state);
     sensorDataCache_.clear();  // Clear previous sensor readings
 
-    std::cout << "[Tick " << state.tick << "] Robot " << id_ << " sensing...\n";
+    std::cout << "[Tick " << state.tick << "] Robot " << id_ + 1 << " sensing...\n";
 
     for (auto& sensor : sensors_)
     {
@@ -84,13 +84,10 @@ void GridRobot::plan(SimulationState& state)
     if (planner_ && (planned_path_cache_.empty() || path_index_cache_ >= planned_path_cache_.size()))
     {
         planned_path_cache_ = planner_->computePath(state, self, grid_);
-        path_index_cache_ = 0;
-    }
+        path_index_cache_ = planned_path_cache_.empty() ? 0 : 1;
 
-    // Update the path_index_cache to avoid getting stuck at the starting point
-    if (path_index_cache_ == 0 && !planned_path_cache_.empty())
-    {
-        ++path_index_cache_; 
+        self.planned_path = planned_path_cache_;
+        self.path_index = path_index_cache_;
     }
 
     // Set next position from the planned path
@@ -119,7 +116,7 @@ void GridRobot::act(SimulationState& state)
     self.mode = RobotMode::MOVING;
     mode_ = self.mode;
 
-    currentPos_ = nextPos_;
+    currentPos_ = self.nextPlannedPos;
     self.position = currentPos_;
 
     if (path_index_cache_ < planned_path_cache_.size())
@@ -132,6 +129,37 @@ void GridRobot::act(SimulationState& state)
     {
         self.mode = RobotMode::IDLE;
         mode_ = self.mode;
+    }
+}
+
+
+/**************** ADD EVENTS *****************/
+
+void GridRobot::addEvents(SimulationState& state) const
+{
+    size_t i = getID();
+
+    // Check if goal reached
+    if (currentPos_ == goal_)
+    {
+        state.events.push_back({EventType::GOAL_REACHED, i, state.tick});
+        return;
+    }
+
+    // Check obstacles
+    for (const auto& data : sensorDataCache_) 
+    {
+        if (!data.positions.empty()) 
+        {
+            state.events.push_back({EventType::OBSTACLE_DETECTED, i, state.tick});
+            break;
+        }
+    }
+
+    // Check replan
+    if (state.robots[i].planned_path != planned_path_cache_) 
+    {
+        state.events.push_back({EventType::REPLAN_TRIGGERED, i, state.tick});
     }
 }
 

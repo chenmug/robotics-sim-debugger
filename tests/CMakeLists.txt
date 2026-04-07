@@ -91,3 +91,17 @@ target_link_libraries(test_breakpoints
 )
 
 add_test(NAME BreakpointManagerTests COMMAND test_breakpoints)
+
+
+# ===============================
+# ConflictResolver tests
+# ===============================
+add_executable(test_conflict_resolver test_conflict_resolver.cpp)
+
+target_link_libraries(test_conflict_resolver
+    robotics_sim_lib
+    gtest
+    gtest_main
+)
+
+add_test(NAME ConflictResolverTests COMMAND test_conflict_resolver)
