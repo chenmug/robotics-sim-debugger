@@ -64,8 +64,6 @@ TEST(EngineController, StepForwardAndBack)
     controller.stepForward();
     Position posAfterStep4 = engine.getCurrentState().robots[0].position;
 
-    // --- Assertions ---
-
     // Snapshots exist
     const SimulationState* tick0 = snapshots.get(0);
     const SimulationState* tick1 = snapshots.get(1);
@@ -280,13 +278,13 @@ TEST(EventBasedBreakpoint, TriggersOnCollisionDetected)
 
     EngineController controller(engine, engine.getSnapshotManager());
 
-    EventBasedBreakpoint evBP(0, {EventType::COLLISION_DETECTED});
-    controller.getBreakpointManager().addEventBreakpoint({EventType::COLLISION_DETECTED});
+    EventBasedBreakpoint evBP(0, {EventType::AVOID_COLLISION});
+    controller.getBreakpointManager().addEventBreakpoint({EventType::AVOID_COLLISION});
 
     SimulationState state = engine.getCurrentState();
     ASSERT_EQ(state.events.size(), 0u);
 
-    state.events.push_back({EventType::COLLISION_DETECTED});
+    state.events.push_back({EventType::AVOID_COLLISION});
 
     ASSERT_EQ(state.events.size(), 1u);
     EXPECT_TRUE(evBP.shouldBreak(state, state.tick));
@@ -327,13 +325,13 @@ TEST(EventBasedBreakpoint, MultipleRobotsCollision)
 
     EngineController controller(engine, engine.getSnapshotManager());
 
-    EventBasedBreakpoint evBP(0, {EventType::COLLISION_DETECTED});
-    controller.getBreakpointManager().addEventBreakpoint({EventType::COLLISION_DETECTED});
+    EventBasedBreakpoint evBP(0, {EventType::AVOID_COLLISION});
+    controller.getBreakpointManager().addEventBreakpoint({EventType::AVOID_COLLISION});
 
     SimulationState state = engine.getCurrentState();
     ASSERT_EQ(state.events.size(), 0u);
 
-    state.events.push_back({EventType::COLLISION_DETECTED});
+    state.events.push_back({EventType::AVOID_COLLISION});
     ASSERT_EQ(state.events.size(), 1u);
 
     state.events.push_back({EventType::OBSTACLE_DETECTED}); 

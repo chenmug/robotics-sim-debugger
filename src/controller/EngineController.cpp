@@ -17,8 +17,8 @@ inline std::string eventTypeToString(EventType type)
         case EventType::REPLAN_TRIGGERED:  
             return "ReplanTriggered";
 
-        case EventType::COLLISION_DETECTED: 
-            return "CollisionDetected";
+        case EventType::AVOID_COLLISION: 
+            return "AvoidCollision";
 
         case EventType::GOAL_REACHED:
             return "GoalReached";

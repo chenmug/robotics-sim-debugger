@@ -84,13 +84,10 @@ void GridRobot::plan(SimulationState& state)
     if (planner_ && (planned_path_cache_.empty() || path_index_cache_ >= planned_path_cache_.size()))
     {
         planned_path_cache_ = planner_->computePath(state, self, grid_);
-        path_index_cache_ = 0;
-    }
+        path_index_cache_ = planned_path_cache_.empty() ? 0 : 1;
 
-    // Update the path_index_cache to avoid getting stuck at the starting point
-    if (path_index_cache_ == 0 && !planned_path_cache_.empty())
-    {
-        ++path_index_cache_; 
+        self.planned_path = planned_path_cache_;
+        self.path_index = path_index_cache_;
     }
 
     // Set next position from the planned path
@@ -119,7 +116,7 @@ void GridRobot::act(SimulationState& state)
     self.mode = RobotMode::MOVING;
     mode_ = self.mode;
 
-    currentPos_ = nextPos_;
+    currentPos_ = self.nextPlannedPos;
     self.position = currentPos_;
 
     if (path_index_cache_ < planned_path_cache_.size())
@@ -141,7 +138,6 @@ void GridRobot::act(SimulationState& state)
 void GridRobot::addEvents(SimulationState& state) const
 {
     size_t i = getID();
-    const Position& myNextPos = state.robots[i].nextPlannedPos;
 
     // Check if goal reached
     if (currentPos_ == goal_)
