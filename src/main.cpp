@@ -38,9 +38,9 @@ int main()
     auto robot4 = std::make_unique<GridRobot>(grid, planner4);
 
     engine.addRobot(std::move(robot1), {0,0}, {9,9});
-    engine.addRobot(std::move(robot2), {0,4}, {4,0});
+    engine.addRobot(std::move(robot2), {2,0}, {1,0});
     engine.addRobot(std::move(robot3), {9,0}, {0,9});
-    engine.addRobot(std::move(robot4), {1,0}, {4,4});
+    engine.addRobot(std::move(robot4), {1,0}, {2,0});
 
     // Save initial state
     engine.getSnapshotManager().save(engine.getCurrentState());
@@ -54,14 +54,11 @@ int main()
     // ---------------------------
     // ADD BREAKPOINTS
     // ---------------------------
-    // Pause at tick 3
-    controller.getBreakpointManager().addTickBreakpoint(3);
-
-    // Pause when robot 1 enters IDLE mode
-    controller.getBreakpointManager().addRobotBreakpoint(0, RobotMode::IDLE);
+    // Pause at tick 17
+    controller.getBreakpointManager().addTickBreakpoint(17);
 
     // Pause when certain events occur (event-based breakpoint)
-    std::vector<EventType> triggerEvents = { EventType::COLLISION_DETECTED};
+    std::vector<EventType> triggerEvents = { EventType::AVOID_COLLISION};
     controller.getBreakpointManager().addEventBreakpoint(triggerEvents);
 
     controller.updateGUI();
