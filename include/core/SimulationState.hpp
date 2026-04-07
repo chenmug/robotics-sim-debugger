@@ -35,7 +35,6 @@ struct Position
     }
 };
 
-
 /**
  * @brief Types of events that can occur during the simulation.
  *
@@ -51,7 +50,7 @@ enum class EventType
 {
     OBSTACLE_DETECTED,   // A robot detected an obstacle
     REPLAN_TRIGGERED,    // A robot triggered path replanning
-    COLLISION_DETECTED,  // A collision between robots or obstacles occurred
+    AVOID_COLLISION,     // A collision between robots or obstacles avoid
     GOAL_REACHED         // A robot reached his goal
 };
 
@@ -100,6 +99,8 @@ struct RobotState
     size_t path_index = 0;              // Index of the next step in the planned path
     Position nextPlannedPos;            // Next planned position of the robot
     RobotMode mode = RobotMode::IDLE;   // The robot mode. default is IDLE
+    bool wasBlocked = false;            // Whether the robot was blocked in the previous tick
+    bool blockedNow = false;            // Whether the robot is blocked in the current tick
 };
 
 /**
