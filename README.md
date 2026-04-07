@@ -169,9 +169,7 @@ Each command operates on consistent snapshots, ensuring reliable navigation thro
 
 ---
 
-## Debugging Capabilities (In Progress)
-
-Planned extensions toward a full debugging system:
+## Debugging Capabilities
 
 - Tick-based breakpoints  
 - State-based breakpoints  
@@ -182,6 +180,22 @@ Example:
 - break at tick = 100  
 - break when robot.state == REPLANNING  
 - break on ObstacleDetected  
+
+---
+
+## Simulation Tick Flow
+
+Each simulation tick executes the following steps:
+
+1. All robots perform `sense()`
+2. Each robot computes a plan using its planner
+3. Conflict resolution is applied
+4. Actions are committed to the simulation state
+5. A snapshot is stored
+
+This guarantees:
+- Deterministic ordering
+- Consistent state transitions  
 
 ---
 
