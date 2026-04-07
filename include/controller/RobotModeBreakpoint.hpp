@@ -1,3 +1,4 @@
+#pragma once
 #include "controller/Breakpoint.hpp"  // Forward Declaration
 #include "robots/Robot.hpp"           // Forward Declaration
 
