@@ -1,121 +1,9 @@
 #include "controller/EngineController.hpp"
+#include "ui/console/ConsoleRenderer.hpp"
 #include <thread>
 #include <chrono>
 #include <iostream>
 #include <string>
-
-
-// TODO: move to GUI layer when switching to graphical rendering
-// Helper: Converts an EventType enum to a human-readable string
-inline std::string eventTypeToString(EventType type)
-{
-    switch(type)
-    {
-        case EventType::OBSTACLE_DETECTED: 
-            return "ObstacleDetected";
-
-        case EventType::REPLAN_TRIGGERED:  
-            return "ReplanTriggered";
-
-        case EventType::AVOID_COLLISION: 
-            return "AvoidCollision";
-
-        case EventType::GOAL_REACHED:
-            return "GoalReached";
-
-        default: return "UnknownEvent";
-    }
-}
-
-
-// TODO: move to GUI layer when switching to graphical rendering
-void printGrid(const SimulationState& state, const GridConfig& grid, size_t tick)
-{
-    // std::system("clear"); 
-    std::cout << "Robotics Simulation Debugger - Console MVP\n";
-    std::cout << "Tick: " << tick << "\n\n";
-
-    for (int y = 0; y < grid.height; ++y)
-    {
-        for (int x = 0; x < grid.width; ++x)
-        {
-            Position pos{x, y};
-            bool printed = false;
-
-            for (size_t i = 0; i < state.robots.size(); ++i)
-            {
-                if (state.robots[i].position == pos)
-                {
-                    std::cout << "R" << i + 1 << " ";
-                    printed = true;
-                    break;
-                }
-            }
-
-            if (printed) continue;
-
-            for (const auto& obst : grid.static_obstacles)
-            {
-                if (obst == pos)
-                {
-                    std::cout << "X ";
-                    printed = true;
-                    break;
-                }
-            }
-
-            if (printed) continue;
-
-            for (const auto& dyn : state.dynamic_obstacles)
-            {
-                if (dyn == pos)
-                {
-                    std::cout << "X ";
-                    printed = true;
-                    break;
-                }
-            }
-
-            if (printed) continue;
-
-            for (size_t i = 0; i < state.robots.size(); ++i)
-            {
-                if (state.robots[i].goal == pos)
-                {
-                    std::cout << "G" << i + 1 << " ";
-                    printed = true;
-                    break;
-                }
-            }
-
-            if (printed) continue;
-
-            std::cout << ". ";
-        }
-
-        std::cout << "\n";
-    }
-
-    std::cout << "\n";
-
-    // Print events for this tick
-    if (!state.events.empty())
-    {
-        std::cout << "Events:\n";
-        for (const auto& event : state.events)
-        {
-            std::cout << " [Event] Robot " << event.robotId + 1
-                      << " triggered " << eventTypeToString(event.type) 
-                      << " at tick " << event.tick << "\n";
-        }
-        std::cout << "\n";
-    }
-}
-
-
-
-
-
 
 
 // /*************** CONSTRUCTOR *****************/
@@ -282,13 +170,8 @@ void EngineController::stepBack()
 
 void EngineController::updateGUI()
 {
-    size_t tick = engine_.getCurrentState().tick;
-
-    const SimulationState* state = snapshot_.get(tick);
-    if (state)
-    {
-        printGrid(*state, engine_.getGridConfig(), tick);
-    }
+    DebugSnapshotView view = buildDebugView();
+    renderView(view);
 }
 
 
@@ -407,4 +290,27 @@ bool EngineController::jumpToTick(size_t targetTick)
     syncToTick(engine_.getCurrentState().tick);
 
     return true;
+}
+
+
+// /************ BUILD DEBUG VIEW ***************/
+
+DebugSnapshotView EngineController::buildDebugView()
+{
+    DebugSnapshotView view;
+    const SimulationState& state = engine_.getCurrentState();
+
+    view.tick = state.tick;
+    view.state = &state;
+    view.grid = &engine_.getGridConfig();
+
+    view.isRunning = isRunning_;
+
+    for (const auto& e : state.events)
+    {
+        view.events.push_back("R" + std::to_string(e.robotId + 1) +
+                              " -> " + eventTypeToString(e.type));
+    }
+
+    return view;
 }

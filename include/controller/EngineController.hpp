@@ -2,6 +2,7 @@
 #include "core/SimulationEngine.hpp"         // Forward Declaration
 #include "core/SnapshotManager.hpp"          // Forward Declaration
 #include "controller/BreakpointManager.hpp"  // Forward Declaration
+#include "ui/debug/DebugSnapshotView.hpp"    // Forward Declaration
 #include <atomic>                            // For std::atomic
 #include <thread>                            // For std::thread
 #include <mutex>                             // For std::mutex
@@ -33,7 +34,6 @@ private:
 
     BreakpointManager breakpointManager_;  // Manages breakpoints for tick and robot mode.
     bool isStepping_ = false;              // Indicates whether the simulation is currently stepping.
-    
 
 public:
     /**
@@ -130,4 +130,21 @@ private:
      * @param tick The target simulation tick to synchronize to.
      */
     void syncToTick(size_t tick);
+
+    /**
+     * @brief Builds a snapshot view of the current simulation state for debugging/UI rendering.
+     *
+     * This function extracts relevant runtime information from the SimulationEngine
+     * and packages it into a DebugSnapshotView structure, which is used by the UI layer
+     * (console or future graphical interface) to render the current simulation state.
+     *
+     * The view includes:
+     * - Current simulation tick
+     * - Simulation state
+     * - Grid configuration reference
+     * - Event system
+     *
+     * @return DebugSnapshotView containing a structured snapshot of the current simulation state.
+     */
+    DebugSnapshotView buildDebugView();
 };
