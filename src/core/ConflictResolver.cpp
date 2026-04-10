@@ -8,18 +8,10 @@
 void ConflictResolver::resolve(SimulationState& state, const GridConfig& grid)
 {
     size_t n = state.robots.size();
-    std::cout << "\n=== RESOLVE CONFLICTS (Tick " << state.tick << ") ===\n";
 
-    resetBlockedNow(state);
-    printRobotStatus(state);
-
-    // Handle conflicts between all robot pairs
-    detectAndHandleConflicts(state, grid);
-
-    // Update wasBlocked status
+    resetBlockedNow(state);                 // Handle conflicts between all robot pairs
+    detectAndHandleConflicts(state, grid);  // Update wasBlocked status
     updateBlockedStates(state);
-
-    std::cout << "=== END RESOLVE ===\n\n";
 }
 
 
@@ -30,22 +22,6 @@ void ConflictResolver::resetBlockedNow(SimulationState& state)
     for (auto& r : state.robots)
     {
         r.blockedNow = false;
-    }
-}
-
-
-/*********** PRINT ROBOT STATUS ************/
-
-void ConflictResolver::printRobotStatus(const SimulationState& state)
-{
-    size_t n = state.robots.size();
-    for (size_t i = 0; i < n; ++i)
-    {
-        const auto& r = state.robots[i];
-        std::cout << "Robot " << i + 1
-                  << " pos=(" << r.position.x << "," << r.position.y << ")"
-                  << " -> next=(" << r.nextPlannedPos.x << "," << r.nextPlannedPos.y << ")"
-                  << " | wasBlocked=" << r.wasBlocked << "\n";
     }
 }
 
@@ -81,7 +57,7 @@ void ConflictResolver::detectAndHandleConflicts(SimulationState& state, const Gr
 
             if (isSwap || sameCell || stuckConflict)
             {
-                handleConflict(r1, r2, state, grid, i, j, stuckConflict);
+                handleConflict(r1, r2, state, grid, i, j);
             }
         }
     }
@@ -90,23 +66,12 @@ void ConflictResolver::detectAndHandleConflicts(SimulationState& state, const Gr
 
 /************ HANDLE CONFLICT *************/
 
-void ConflictResolver::handleConflict(RobotState& r1, RobotState& r2, SimulationState& state, const GridConfig& grid, size_t i, size_t j, bool stuckConflict)
+void ConflictResolver::handleConflict(RobotState& r1, RobotState& r2, SimulationState& state, const GridConfig& grid, size_t i, size_t j)
 {
-    std::cout << "Conflict detected between Robot " << i + 1
-              << " and Robot " << j + 1;
-
-    if (stuckConflict)
-    {
-        std::cout << " (STUCK)";
-    }
-    
-    std::cout << "\n";
-
     bool firstTime = (!r1.wasBlocked && !r2.wasBlocked);
 
     if (firstTime)
     {
-        std::cout << "First time conflict: BOTH WAIT (1 tick)\n";
         r1.nextPlannedPos = r1.position;
         r2.nextPlannedPos = r2.position;
         r1.blockedNow = true;
@@ -138,9 +103,6 @@ void ConflictResolver::updateBlockedStates(SimulationState& state)
     {
         auto& r = state.robots[i];
         r.wasBlocked = r.blockedNow;
-        std::cout << "Robot " << i + 1
-                  << " blockedNow=" << r.blockedNow
-                  << " -> wasBlocked=" << r.wasBlocked << "\n";
     }
 }
 
@@ -150,8 +112,6 @@ void ConflictResolver::updateBlockedStates(SimulationState& state)
 void ConflictResolver::moveAside(SimulationState& state, RobotState& robot, const GridConfig& grid)
 {
     Position escape = findFreeNeighbor(state, robot, grid);
-    std::cout << "Robot " << robot.id + 1 << " (LOW priority) MOVES ASIDE to ("
-              << escape.x << "," << escape.y << ")\n";
 
     robot.nextPlannedPos = escape;
     robot.blockedNow = true;

@@ -64,16 +64,6 @@ private:
     void resetBlockedNow(SimulationState& state);
 
     /**
-     * @brief Print the status of all robots for debugging purposes.
-     *
-     * Prints the current position, next planned position, and blocked state of each robot
-     * to the console for debugging.
-     *
-     * @param state The current simulation state
-     */
-    void printRobotStatus(const SimulationState& state);
-
-    /**
      * @brief Detect and handle conflicts between all pairs of robots.
      *
      * Checks all pairs of robots to detect conflicts based on their planned movements.
@@ -98,10 +88,9 @@ private:
      * @param grid          The grid configuration
      * @param i             The index of the first robot
      * @param j             The index of the second robot
-     * @param stuckConflict Flag indicating if the conflict is a "stuck" deadlock situation
      */
     void handleConflict(RobotState& r1, RobotState& r2, SimulationState& state, 
-        const GridConfig& grid, size_t i, size_t j, bool stuckConflict);
+        const GridConfig& grid, size_t i, size_t j);
 
     /**
      * @brief Update the 'wasBlocked' status for all robots.
