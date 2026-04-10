@@ -47,8 +47,6 @@ void GridRobot::sense(const SimulationState& state)
     syncWithState(state);
     sensorDataCache_.clear();  // Clear previous sensor readings
 
-    std::cout << "[Tick " << state.tick << "] Robot " << id_ + 1 << " sensing...\n";
-
     for (auto& sensor : sensors_)
     {
         if (!sensor)
@@ -58,12 +56,6 @@ void GridRobot::sense(const SimulationState& state)
 
         SensorData data = sensor->read(state, grid_, id_);
         sensorDataCache_.push_back(data);
-
-        // TODO: for debugging - remove it later
-        std::cout << "  detects obstacles at: ";
-        for (const auto& pos : data.positions)
-            std::cout << "(" << pos.x << "," << pos.y << ") ";
-        std::cout << "\n";
     }
 }
 
@@ -113,22 +105,31 @@ void GridRobot::act(SimulationState& state)
     RobotState& self = state.robots[id_];
     
     // Change mode BEFORE moving
-    self.mode = RobotMode::MOVING;
+    if (self.position != self.nextPlannedPos)
+    {
+        self.position = self.nextPlannedPos;
+        currentPos_ = self.position;
+
+        self.mode = RobotMode::MOVING;
+    }
+    else
+    {
+        self.mode = RobotMode::REPLANNING;
+    }
+
     mode_ = self.mode;
 
-    currentPos_ = self.nextPlannedPos;
-    self.position = currentPos_;
+    if (self.position == self.goal)
+    {
+        self.mode = RobotMode::GOAL;
+        mode_ = self.mode;
+        return;
+    }
 
     if (path_index_cache_ < planned_path_cache_.size())
     {
         ++path_index_cache_;
         self.path_index = path_index_cache_;
-    }
-
-    else  // Reached the goal
-    {
-        self.mode = RobotMode::IDLE;
-        mode_ = self.mode;
     }
 }
 
