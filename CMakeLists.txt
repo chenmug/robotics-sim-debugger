@@ -17,6 +17,7 @@ file(GLOB_RECURSE SOURCES
     "src/robots/*.cpp"
     "src/sensors/*.cpp"
     "src/controller/*.cpp"
+    "src/ui/**/*.cpp"
 )
 
 # library with all core code
