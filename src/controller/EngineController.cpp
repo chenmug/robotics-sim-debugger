@@ -312,5 +312,33 @@ DebugSnapshotView EngineController::buildDebugView()
                               " -> " + eventTypeToString(e.type));
     }
 
+    view.robotsInfo = collectPlannerDebugInfo();
+
     return view;
+}
+
+
+// /******** COLLECT PLANNER DEBUG INFO *********/
+
+std::vector<RobotDebugInfo> EngineController::collectPlannerDebugInfo() const
+{
+    std::vector<RobotDebugInfo> result;
+
+    for (const auto& robot : engine_.getRobots())
+    {
+        RobotDebugInfo info;
+
+        info.name = "R" + std::to_string(robot->getID() + 1);
+
+        if (auto* planner = robot->getPlanner())
+        {
+            info.algorithm = planner->getAlgorithmName();
+            info.nodesExpanded = planner->getNodesExpanded();
+            info.plannerTimeMs = planner->getLastRunTimeMs();
+        }
+
+        result.push_back(info);
+    }
+
+    return result;
 }
