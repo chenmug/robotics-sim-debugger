@@ -183,12 +183,12 @@ void GridRobot::setPlanner(std::shared_ptr<Planner> planner)
 }
 
 
-/*************** GET PLANNER ***************/
+// /*************** GET PLANNER ***************/
 
-std::shared_ptr<Planner> GridRobot::getPlanner() const
-{
-    return planner_;
-}
+// std::shared_ptr<Planner> GridRobot::getPlanner() const
+// {
+//     return planner_;
+// }
 
 
 /**************** SET PATH *****************/
@@ -220,4 +220,11 @@ const std::vector<Position>& GridRobot::getPath([[maybe_unused]] const Simulatio
 size_t GridRobot::getPathIndex([[maybe_unused]] const SimulationState& state) const
 {
     return path_index_cache_;
+}
+
+
+
+Planner* GridRobot::getPlanner() const
+{
+    return planner_.get();
 }

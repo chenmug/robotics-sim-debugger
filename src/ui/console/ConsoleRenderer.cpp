@@ -1,5 +1,8 @@
 #include "ui/console/ConsoleRenderer.hpp"
 #include <iostream>
+#include <iomanip>
+#include <sstream>
+#include <map>
 
 
 // /********** EVENT TYPE TO STRING *************/
@@ -56,10 +59,12 @@ std::string robotModeToString(RobotMode mode)
 
 void renderView(const DebugSnapshotView& view)
 {
+    std::system("clear");
     renderHeader(view);
     renderGrid(view);
     renderRobots(view);
     renderEvents(view);
+    renderPerformance(view);
     renderFooter();
 }
 
@@ -198,17 +203,34 @@ void renderRobots(const DebugSnapshotView& view)
 
 void renderEvents(const DebugSnapshotView& view)
 {
+    std::map<size_t, std::vector<EventType>> grouped;
     std::cout << "Events:\n";
 
-    if (view.events.empty())
+    if (!view.state || view.state->events.empty())
     {
         std::cout << " (none)\n\n";
         return;
     }
 
-    for (const auto& e : view.events)
+    for (const auto& e : view.state->events)
     {
-        std::cout << " - " << e << "\n";
+        grouped[e.robotId].push_back(e.type);
+    }
+
+    for (const auto& [robotId, events] : grouped)
+    {
+        std::cout << "R" << robotId + 1
+                  << " [" << events.size() << " events] -> ";
+
+        for (size_t i = 0; i < events.size(); ++i)
+        {
+            std::cout << eventTypeToString(events[i]);
+
+            if (i + 1 < events.size())
+                std::cout << ", ";
+        }
+
+        std::cout << "\n";
     }
 
     std::cout << "\n";
@@ -222,4 +244,33 @@ void renderFooter()
     std::cout << "===============================================================\n";
     std::cout << "[n] next | [b] back | [r] run | [p] pause | [j] jump | [q] quit\n";
     std::cout << "===============================================================\n";
+}
+
+
+// /************ RENDER PERFORMANCE **************/
+
+void renderPerformance(const DebugSnapshotView& view)
+{
+    if (view.robotsInfo.empty())
+    {
+        return;
+    }
+
+    std::cout << "Performance:\n";
+
+    for (const auto& r : view.robotsInfo)
+    {
+        std::ostringstream out;
+
+        out << std::left
+            << std::setw(5) << r.name << " | "
+            << std::setw(10) << r.algorithm << " | "
+            << std::setw(5) << r.nodesExpanded << " | "
+            << std::setw(6) << std::fixed << std::setprecision(3)
+            << r.plannerTimeMs << "ms";
+
+        std::cout << out.str() << "\n";
+    }
+
+    std::cout << "\n";
 }

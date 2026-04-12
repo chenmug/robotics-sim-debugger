@@ -82,3 +82,19 @@ std::vector<Position> Planner::reconstructPath(const std::unordered_map<size_t, 
 
     return path;
 }
+
+
+/************ GET NODE EXPANDED ************/
+
+size_t Planner::getNodesExpanded() const 
+{ 
+    return lastNodesExpanded_; 
+}
+
+
+/************* GET LAST RUN TIMES ************/
+
+double Planner::getLastRunTimeMs() const 
+{ 
+    return lastRunTimeMs_; 
+}

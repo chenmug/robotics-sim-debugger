@@ -47,3 +47,11 @@ RobotMode Robot::getMode() const
 { 
     return mode_; 
 }
+
+
+/**************** GET PLANNER *****************/
+
+Planner* Robot::getPlanner() const
+{
+    return nullptr;
+}

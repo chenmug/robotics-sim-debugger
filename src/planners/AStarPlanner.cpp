@@ -8,3 +8,11 @@ int AStarPlanner::heuristic(const Position& a, const Position& b) const
 {
     return std::abs(a.x - b.x) + std::abs(a.y - b.y); // Manhattan distance
 }
+
+
+/*********** GET ALGORITHM NAME ************/
+
+std::string AStarPlanner::getAlgorithmName() const
+{
+    return "A*";
+}

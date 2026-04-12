@@ -1,5 +1,6 @@
 #pragma once
 #include "planners/GraphSearchPlanner.hpp"  // Forward Declaration
+#include <string>                           // For std::string
 
 
 /**
@@ -24,4 +25,7 @@ public:
      * @return Estimated cost from `a` to `b` (Manhattan distance)
      */
     int heuristic(const Position& a, const Position& b) const override;
+
+    // Return the name of the planner algorithm - A*.
+    std::string getAlgorithmName() const override;
 };

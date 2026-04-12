@@ -147,4 +147,19 @@ private:
      * @return DebugSnapshotView containing a structured snapshot of the current simulation state.
      */
     DebugSnapshotView buildDebugView();
+
+    /**
+     * @brief Collects debugging information from all robots' planners.
+     *
+     * This function iterates over all robots managed by the simulation engine
+     * and extracts performance and diagnostic data from their associated planners.
+     *
+     * The collected information typically includes:
+     * - Planner algorithm name (e.g., A*, BFS, Dijkstra)
+     * - Number of nodes expanded during the last planning run
+     * - Execution time of the last planning cycle in milliseconds
+     *
+     * @return A vector of RobotDebugInfo structures
+     */
+    std::vector<RobotDebugInfo> collectPlannerDebugInfo() const;
 };

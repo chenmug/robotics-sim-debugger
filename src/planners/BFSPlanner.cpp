@@ -1,5 +1,6 @@
 #include "planners/BFSPlanner.hpp"
-#include <queue>  // For std::queue
+#include <queue>   // For std::queue
+#include <chrono>  // For timing
 
 
 /**************** COMPUTE PATH ****************/
@@ -15,6 +16,10 @@ std::vector<Position> BFSPlanner::computePath(const SimulationState& state,
     // Track visited positions to avoid revisiting
     std::unordered_map<size_t, bool> visited;
 
+    using Clock = std::chrono::high_resolution_clock;
+    auto startTime = Clock::now();
+
+    lastNodesExpanded_ = 0; // Reset counter
     Position start = robot.position;
     Position goal  = robot.goal;
 
@@ -33,10 +38,12 @@ std::vector<Position> BFSPlanner::computePath(const SimulationState& state,
     {
         Position current = openQueue.front();
         openQueue.pop();
+        ++lastNodesExpanded_; // Count this node as expanded
 
         // If we reached the goal, reconstruct and return the path
         if (current == goal)
         {
+            lastRunTimeMs_ = std::chrono::duration<double, std::milli>(Clock::now() - startTime).count();
             return reconstructPath(cameFrom, start, goal, grid);
         }
 
@@ -61,5 +68,14 @@ std::vector<Position> BFSPlanner::computePath(const SimulationState& state,
         }
     }
 
+    lastRunTimeMs_ = std::chrono::duration<double, std::milli>(Clock::now() - startTime).count();
     return {}; // No path found
+}
+
+
+/*********** GET ALGORITHM NAME ************/
+
+std::string BFSPlanner::getAlgorithmName() const
+{
+    return "BFS";
 }

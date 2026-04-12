@@ -128,6 +128,14 @@ SnapshotManager& SimulationEngine::getSnapshotManager()
 }
 
 
+/*************** GET ROBOTS ****************/
+
+const std::vector<std::unique_ptr<Robot>>& SimulationEngine::getRobots() const
+{
+    return robots;
+}
+
+
 /************ PROCESS EVENTS **************/
 
 void SimulationEngine::processEvents()

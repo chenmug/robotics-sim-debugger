@@ -2,6 +2,7 @@
 #include "core/SimulationState.hpp"  // Forward Declaration
 #include <vector>                    // For std::vector
 #include <unordered_map>             // For std::unordered_map
+#include <string>                    // For std::string
 
 struct GridConfig;
 
@@ -10,9 +11,18 @@ struct GridConfig;
  *
  * Each concrete planner (e.g., A*, Dijkstra, BFS) must inherit from this class
  * and implement the computePath method.
+ * 
+ * This class tracks performance metrics for debugging and analysis:
+ * - Number of nodes expanded during the last path computation.
+ * - Duration of the last path planning run (in milliseconds).
  */
 class Planner
 {
+protected:
+
+    size_t lastNodesExpanded_ = 0;  // Number of nodes expanded in the last computePath call
+    double lastRunTimeMs_ = 0.0;    // Duration of the last computePath call (milliseconds)
+
 public:
 
     /**
@@ -32,6 +42,25 @@ public:
      */
     virtual std::vector<Position> computePath(const SimulationState& state,
                                 const RobotState& robot,const GridConfig& grid) = 0;
+
+    /**
+     * @brief Return the name of the planner algorithm (e.g., "A*", "BFS", "Dijkstra").
+     */
+    virtual std::string getAlgorithmName() const = 0;
+
+    /**
+     * @brief Get the number of nodes expanded during the last path planning run.
+     *
+     * @return Number of nodes expanded.
+     */
+    size_t getNodesExpanded() const;
+
+    /**
+     * @brief Get the duration of the last path planning run in milliseconds.
+     *
+     * @return Duration in milliseconds.
+     */
+    double getLastRunTimeMs() const;
     
     // Virtual destructor for proper cleanup of derived classes
     virtual ~Planner() = default;
@@ -63,6 +92,7 @@ protected:
      * 
      * @param pos Position to hash.
      * @param grid Grid configuration.
+     * 
      * @return Unique hash value.
      */
     size_t hashPos(const Position& pos, const GridConfig& grid) const;
