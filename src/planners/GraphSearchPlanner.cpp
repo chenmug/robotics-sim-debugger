@@ -1,5 +1,6 @@
 #include "planners/GraphSearchPlanner.hpp"
-#include <queue>          // For priority_queue
+#include <queue>   // For priority_queue
+#include <chrono>  // For timing
 
 
 /**************** COMPUTE PATH ****************/
@@ -7,6 +8,10 @@
 std::vector<Position> GraphSearchPlanner::computePath(const SimulationState& state,
     const RobotState& robot, const GridConfig& grid)
 {
+    using Clock = std::chrono::high_resolution_clock;
+    auto startTime = Clock::now();
+
+    lastNodesExpanded_ = 0; // Reset counter
     const Position start = robot.position;
     const Position goal  = robot.goal;
 
@@ -33,10 +38,12 @@ std::vector<Position> GraphSearchPlanner::computePath(const SimulationState& sta
     {
         PQElement current = openSet.top();
         openSet.pop();
+        ++lastNodesExpanded_; // Count this node as expanded
 
         // If we reached the goal, reconstruct and return the path
         if (current.pos == goal)
         {
+            lastRunTimeMs_ = std::chrono::duration<double, std::milli>(Clock::now() - startTime).count();
             return reconstructPath(cameFrom, start, goal, grid);
         }
 
@@ -67,5 +74,6 @@ std::vector<Position> GraphSearchPlanner::computePath(const SimulationState& sta
     }
 
     // No path found
+    lastRunTimeMs_ = std::chrono::duration<double, std::milli>(Clock::now() - startTime).count();
     return {};
 }

@@ -1,6 +1,8 @@
 #pragma once
 #include "planners/Planner.hpp"       // Forward Declaration
 #include "core/SimulationEngine.hpp"  // Forward Declaration
+#include <string>                     // For std::string
+
 
 /**
  * @brief Breadth-First Search planner for grid-based robots.
@@ -20,6 +22,9 @@ public:
      * 
      * @return Vector of Positions from start to goal, empty if no path found.
      */
-    std::vector<Position> computePath( const SimulationState& state,
+    std::vector<Position> computePath(const SimulationState& state,
                         const RobotState& robot, const GridConfig& grid) override;
+
+    // Return the name of the planner algorithm - BFS.
+    std::string getAlgorithmName() const override;
 };

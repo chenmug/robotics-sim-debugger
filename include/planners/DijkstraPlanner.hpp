@@ -1,5 +1,6 @@
 #pragma once
 #include "planners/GraphSearchPlanner.hpp"  // Forward Declaration
+#include <string>                           // For std::string
 
 
 /**
@@ -16,4 +17,7 @@ public:
 
     // Heuristic function for Dijkstra's algorithm - always returns 0.
     int heuristic(const Position& a, const Position& b) const override;
+
+    // Return the name of the planner algorithm - Dijkstra.
+    std::string getAlgorithmName() const override;
 };
