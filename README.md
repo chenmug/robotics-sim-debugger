@@ -39,6 +39,7 @@ This project explores how to transform a simulation into a **deterministic, insp
 - Multi-threaded simulation architecture  
 - Multi-agent coordination with conflict resolution  
 - Modular robotics framework  
+- Performance Benchmarking: Ability to measure and print various performance metrics, including planner execution time and nodes expanded.
 
 ---
 
@@ -159,11 +160,12 @@ public:
 
 Commands:
 
-- `n` — step forward  
-- `b` — step backward  
-- `r` — run continuously  
-- `p` — pause  
-- `q` — quit  
+- `n` - step forward  
+- `b` - step backward  
+- `r` - run continuously  
+- `p` - pause  
+- `j` - jump to specific chosen tick
+- `q` - quit  
 
 Each command operates on consistent snapshots, ensuring reliable navigation through simulation time.
 
@@ -199,14 +201,15 @@ This guarantees:
 
 ---
 
-## Performance Benchmarking (Planned)
+## Performance Benchmarking
 
-Planned metrics:
+Performance metrics:
 
 - Tick execution time (ms)  
 - Planner computation time  
 - Number of processed actions per tick  
-- Pathfinding complexity (e.g., nodes explored)  
+- Pathfinding complexity (e.g., nodes expanded)  
+- Planner execution time per robot
 
 ---
 
@@ -279,17 +282,21 @@ robotics-sim-debugger/
 │   ├── core/
 │   ├── robots/
 │   ├── planners/
-│   └── controller/
+│   ├── controller/
+|   └── ui/
+|       ├── console/
+|       └── debug/
 │
 ├── src/
 │   ├── core/
 │   ├── robots/
 │   ├── planners/
-│   └── controller/
+│   ├── controller/
+|   └── ui/
+|       ├── console/
 │
 ├── gui/ (planned)
-├── tests/
-└── assets/
+└── tests/
 ```
 
 ---
@@ -329,12 +336,8 @@ ctest
 - Unit tests (GoogleTest)  
 - Snapshot consistency validation  
 - Step forward/backward correctness  
-- Deterministic execution verification  
-
-Planned:
-
-- Benchmarking per tick  
-- Breakpoint behavior validation  
+- Deterministic execution verification
+- Breakpoint behavior validation    
 
 ---
 
@@ -344,7 +347,9 @@ Planned:
 - Snapshot-based step forward/backward   
 - Multi-agent coordination  
 - Console debugger  
-- Breakpoint system   
+- Breakpoint syste
+- Benchmarking
+- GUI console   
 
 In progress:
 
