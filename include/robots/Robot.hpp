@@ -2,6 +2,7 @@
 #include "core/SimulationState.hpp"  // Forward Declaration
 #include "sensors/Sensor.hpp"        // Forward Declaration
 #include "robots/RobotMode.hpp"      // Forward Declaration
+#include "planners/Planner.hpp"      // Forward Declaration
 #include <cstddef>                   // For size_t
 
 
@@ -67,6 +68,18 @@ public:
      * @brief Get the current mode of the robot.
      */
     RobotMode getMode() const;
+
+    /**
+     * @brief Get the planner associated with this robot (if any).
+     * 
+     * Default returns nullptr, meaning the robot does not use a planner.
+     * The planner determines the pathfinding or decision-making strategy used by the robot
+     * to reach its goal or navigate the environment.
+     * 
+     * @return A pointer to the planner instance used by the robot, or nullptr if the robot 
+     *         does not use a planner.
+     */
+    virtual Planner* getPlanner() const;
 
     /**
      * @brief Observe the environment.

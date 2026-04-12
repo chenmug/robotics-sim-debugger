@@ -1,6 +1,5 @@
 #pragma once
 #include "robots/Robot.hpp"           // Forward Declaration
-#include "planners/Planner.hpp"       // Forward declaration
 #include "core/SimulationEngine.hpp"  // For GridConfig
 #include <memory>                     // For std::shared_ptr
 
@@ -105,9 +104,9 @@ public:
     /**
      * @brief Get the current planner strategy of the robot.
      * 
-     * @return Shared pointer to the current planner.
+     * @return A pointer to the current planner instance associated with the robot.
      */
-    std::shared_ptr<Planner> getPlanner() const;
+    Planner* getPlanner() const override;
 
     /**
      * @brief Set the planned path for the robot.
