@@ -81,3 +81,17 @@ std::string eventTypeToString(EventType type);
  * @return String representation of the robot mode.
  */
 std::string robotModeToString(RobotMode mode);
+
+/**
+ * @brief Renders the performance summary of robots in the simulation.
+ *
+ * This function prints the performance data for each robot in the simulation displaying the 
+ * following information:
+ * - Robot name
+ * - Planning algorithm used
+ * - Number of nodes expanded during planning
+ * - Planner execution time (in milliseconds)
+ *
+ * @param view The snapshot view containing information about the simulation state.
+ */
+void renderPerformance(const DebugSnapshotView& view);
