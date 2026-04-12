@@ -110,6 +110,13 @@ public:
     SnapshotManager& getSnapshotManager();
 
     /**
+     * @brief Access the list of robots currently in the simulation.
+     * 
+     * @return const Reference to robots vector.
+     */
+    const std::vector<std::unique_ptr<Robot>>& getRobots() const;
+
+    /**
      * @brief Process all robot events and add the events in the current state.
      * 
      * This function adds events related to the robot's actions or environment during the 
