@@ -34,6 +34,7 @@ private:
 
     BreakpointManager breakpointManager_;  // Manages breakpoints for tick and robot mode.
     bool isStepping_ = false;              // Indicates whether the simulation is currently stepping.
+    int selectedRobotId_ = -1;             // The ID of the selected robot, defult = -1 (no robot selected)
 
 public:
     /**
@@ -107,6 +108,25 @@ public:
      */
     bool jumpToTick(size_t targetTick);
 
+    /**
+     * @brief Set the currently selected robot by its ID.
+     *
+     * This function allows the user to select a specific robot in the simulation by its ID,
+     * which can then be used to display detailed information about that robot in the UI.
+     *
+     * @param id The ID of the robot to select.
+     */
+    void setSelectedRobot(int id);
+
+    /**
+     * @brief Get the currently selected robot's ID.
+     *
+     * This function returns the ID of the robot currently selected by the user. 
+     *
+     * @return The ID of the selected robot, or -1 if no robot is selected.
+     */
+    int getSelectedRobot() const;
+
 private:
 
     // Main simulation loop executed by `simulationThread_`.
@@ -149,17 +169,23 @@ private:
     DebugSnapshotView buildDebugView();
 
     /**
-     * @brief Collects debugging information from all robots' planners.
+     * @brief Collects debugging and diagnostic information from all robots.
      *
      * This function iterates over all robots managed by the simulation engine
-     * and extracts performance and diagnostic data from their associated planners.
+     * and extracts performance and diagnostic data from their associated planners
+     * as well as their current state, including the planned path and the progress
+     * of the robot along that path.
      *
      * The collected information typically includes:
      * - Planner algorithm name (e.g., A*, BFS, Dijkstra)
      * - Number of nodes expanded during the last planning run
      * - Execution time of the last planning cycle in milliseconds
+     * - Current planned path length
+     * - The robot's progress along its path (i.e., the current position in the path)
+     * - The robot's current path (up to the current position)
      *
-     * @return A vector of RobotDebugInfo structures
+     * @return A vector of RobotDebugInfo structures containing detailed information
+     *         about each robot's planner and state.
      */
-    std::vector<RobotDebugInfo> collectPlannerDebugInfo() const;
+    std::vector<RobotDebugInfo> collectRobotDebugInfo() const;
 };

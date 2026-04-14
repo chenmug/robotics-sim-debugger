@@ -17,6 +17,7 @@ struct RobotDebugInfo
     size_t nodesExpanded = 0;     // Nodes explored
     size_t pathLength = 0;        // Current path length
     double plannerTimeMs = 0.0;   // Duration of planning
+    std::vector<Position> path;   // The path of the selected robot
 };
 
 /**
@@ -36,4 +37,5 @@ struct DebugSnapshotView
     std::vector<std::string> events;         // Events generated at this tick
     std::vector<RobotDebugInfo> robotsInfo;  // Robot debug information for each robot in the simulation
     bool isRunning = false;                  // Indicates whether simulation is currently running 
+    int selectedRobotId = -1;                // The ID of the selected robot, defult = -1 (no robot selected)
 };

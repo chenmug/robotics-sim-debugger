@@ -9,7 +9,6 @@
 #include <iostream>
 
 
-
 // ======================================
 // Main
 // ======================================
@@ -50,7 +49,6 @@ int main()
     // ---------------------------
     EngineController controller(engine, engine.getSnapshotManager());
 
-
     // ---------------------------
     // ADD BREAKPOINTS
     // ---------------------------
@@ -77,7 +75,7 @@ int main()
             break;
         }
 
-        std::cout << "Commands: [n]ext, [b]ack, [r]un, [p]ause, [j]ump, [q]uit: ";
+        std::cout << "Commands: [n]ext, [b]ack, [r]un, [p]ause, [j]ump, [s]elect, [q]uit: ";
         char cmd;
         std::cin >> cmd;
 
@@ -122,7 +120,27 @@ int main()
             
             break;
         }
-        
+
+        case 's':
+        {
+            int id;
+            std::cout << "Select robot ID: ";
+            std::cin >> id;
+
+            controller.setSelectedRobot(id - 1);
+
+            if (controller.getSelectedRobot() == -1)
+            {
+                std::cout << "Invalid robot selected\n";
+            }
+            else
+            {
+                std::cout << "Selected R" << id << "\n";
+            }
+
+            break;
+        }
+                
         default:
             std::cout << "Invalid command!\n" << std::endl;
             break;
