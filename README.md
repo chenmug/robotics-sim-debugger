@@ -223,6 +223,8 @@ Performance metrics:
 - Timeline slider  
 - Breakpoint management UI  
 
+- The current console renderer is a temporary debugging interface and is intentionally decoupled from the simulation core to allow future replacement with a full graphical frontend.
+
 ---
 
 ## Architecture Overview

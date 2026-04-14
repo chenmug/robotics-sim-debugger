@@ -1,5 +1,6 @@
 #include "controller/EngineController.hpp"
 #include "ui/console/ConsoleRenderer.hpp"
+#include "robots/GridRobot.hpp"
 #include <thread>
 #include <chrono>
 #include <iostream>
@@ -234,7 +235,6 @@ void EngineController::syncToTick(size_t tick)
 
     SimulationState synced = *state;
     synced.tick = tick;
-
     engine_.setCurrentState(synced);
 
     updateGUI();
@@ -298,21 +298,20 @@ bool EngineController::jumpToTick(size_t targetTick)
 DebugSnapshotView EngineController::buildDebugView()
 {
     DebugSnapshotView view;
-    const SimulationState& state = engine_.getCurrentState();
+    size_t tick = engine_.getCurrentState().tick;
 
-    view.tick = state.tick;
-    view.state = &state;
-    view.grid = &engine_.getGridConfig();
-
-    view.isRunning = isRunning_;
-
-    for (const auto& e : state.events)
+    const SimulationState* state = snapshot_.get(tick);
+    if (!state)
     {
-        view.events.push_back("R" + std::to_string(e.robotId + 1) +
-                              " -> " + eventTypeToString(e.type));
+        return view; 
     }
 
-    view.robotsInfo = collectPlannerDebugInfo();
+    view.tick = state->tick;
+    view.state = state;  
+    view.grid = &engine_.getGridConfig();
+    view.selectedRobotId = selectedRobotId_;
+    view.isRunning = isRunning_;
+    view.robotsInfo = collectRobotDebugInfo();
 
     return view;
 }
@@ -320,7 +319,7 @@ DebugSnapshotView EngineController::buildDebugView()
 
 // /******** COLLECT PLANNER DEBUG INFO *********/
 
-std::vector<RobotDebugInfo> EngineController::collectPlannerDebugInfo() const
+std::vector<RobotDebugInfo> EngineController::collectRobotDebugInfo() const
 {
     std::vector<RobotDebugInfo> result;
 
@@ -337,8 +336,40 @@ std::vector<RobotDebugInfo> EngineController::collectPlannerDebugInfo() const
             info.plannerTimeMs = planner->getLastRunTimeMs();
         }
 
+        if (auto* gridRobot = dynamic_cast<const GridRobot*>(robot.get()))
+        {
+            info.pathLength = gridRobot->getPathLength();
+            const auto& fullPath = gridRobot->getPath();
+            size_t idx = gridRobot->getPathIndex();
+
+            if (idx > fullPath.size())
+            {
+                idx = fullPath.size();
+            }
+            info.path.assign(fullPath.begin(), fullPath.begin() + idx);
+        }
+
         result.push_back(info);
     }
 
     return result;
+}
+
+
+// /************ SET SELECTED ROBOT *************/
+
+void EngineController::setSelectedRobot(int id)
+{
+    std::lock_guard<std::mutex> lock(mtx_);
+    selectedRobotId_ = id;
+    updateGUI();
+}
+
+
+// /************ GET SELECTED ROBOT *************/
+
+int EngineController::getSelectedRobot() const
+{
+    std::lock_guard<std::mutex> lock(mtx_);
+    return selectedRobotId_;
 }
