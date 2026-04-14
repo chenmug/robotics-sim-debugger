@@ -165,6 +165,7 @@ Commands:
 - `r` - run continuously  
 - `p` - pause  
 - `j` - jump to specific chosen tick
+- `s` - select a specific robot
 - `q` - quit  
 
 Each command operates on consistent snapshots, ensuring reliable navigation through simulation time.
@@ -223,7 +224,7 @@ Performance metrics:
 - Timeline slider  
 - Breakpoint management UI  
 
-- The current console renderer is a temporary debugging interface and is intentionally decoupled from the simulation core to allow future replacement with a full graphical frontend.
+> The current console renderer is a temporary debugging interface and is intentionally decoupled from the simulation core to allow future replacement with a full graphical frontend.
 
 ---
 
