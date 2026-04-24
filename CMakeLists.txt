@@ -33,3 +33,6 @@ enable_testing()
 
 # add tests folder
 add_subdirectory(tests)
+
+# add gui folder
+add_subdirectory(gui)
