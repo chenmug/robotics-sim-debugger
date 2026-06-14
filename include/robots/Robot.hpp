@@ -22,7 +22,7 @@ class Robot
 {
 protected:
     size_t id_ = 0;                                 // Unique robot identifier
-    std::vector<std::shared_ptr<Sensor>> sensors_;  // List of sensors attached to this robot
+    std::vector<std::unique_ptr<Sensor>> sensors_;  // List of sensors attached to this robot
     std::vector<SensorData> sensorDataCache_;       // Cached readings from all sensors
     RobotMode mode_ = RobotMode::IDLE;              // Current mode of the robot
 
@@ -48,9 +48,9 @@ public:
     /**
      * @brief Attach a new sensor to this robot.
      *
-     * @param sensor Shared pointer to a sensor instance.
+     * @param sensor Uniqe pointer to a sensor instance.
      */
-    void addSensor(std::shared_ptr<Sensor> sensor);
+    void addSensor(std::unique_ptr<Sensor> sensor);
 
     /**
      * @brief Access the last cached sensor readings.

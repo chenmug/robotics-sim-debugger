@@ -5,22 +5,26 @@
 #include "controller/EventBasedBreakpoint.hpp"
 
 
+// /*************** ALLOCATE ID ***************/
+
+size_t BreakpointManager::allocateID()
+{
+    if (!removedIDs_.empty())
+    {
+        size_t id = removedIDs_.front();
+        removedIDs_.pop();
+        return id;
+    }
+
+    return nextBreakpointID_++;
+}
+
+
 // /*********** ADD TICK BREAKPOINT ***********/
 
 size_t BreakpointManager::addTickBreakpoint(size_t tick)
 {
-    size_t id = 0;
-
-    if (!removedIDs_.empty())
-    {
-        id = removedIDs_.front();
-        removedIDs_.pop();
-    }
-    else
-    {
-        id = nextBreakpointID_++;
-    }
-
+    const size_t id = allocateID();
     breakpoints_.push_back(std::make_unique<TickBreakpoint>(id, tick));
     
     return id;
@@ -31,18 +35,7 @@ size_t BreakpointManager::addTickBreakpoint(size_t tick)
 
 size_t BreakpointManager::addRobotBreakpoint(size_t robotId, RobotMode mode)
 {
-    size_t id = 0;
-
-    if (!removedIDs_.empty())
-    {
-        id = removedIDs_.front();
-        removedIDs_.pop();
-    }
-    else
-    {
-        id = nextBreakpointID_++;
-    }
-
+    const size_t id = allocateID();
     breakpoints_.push_back(std::make_unique<RobotModeBreakpoint>(id, robotId, mode));
 
     return id;
@@ -53,18 +46,7 @@ size_t BreakpointManager::addRobotBreakpoint(size_t robotId, RobotMode mode)
 
 size_t BreakpointManager::addEventBreakpoint(const std::vector<EventType>& triggers)
 {
-    size_t id = 0;
-
-    if (!removedIDs_.empty())
-    {
-        id = removedIDs_.front();
-        removedIDs_.pop();
-    }
-    else
-    {
-        id = nextBreakpointID_++;
-    }
-
+    const size_t id = allocateID();
     breakpoints_.push_back(std::make_unique<EventBasedBreakpoint>(id, triggers));
 
     return id;
@@ -95,6 +77,13 @@ bool BreakpointManager::removeBreakpoint(size_t breakpointID)
 void BreakpointManager::clearAllBreakpoints()
 {
     breakpoints_.clear();
+
+    while (!removedIDs_.empty())
+    {
+        removedIDs_.pop();
+    }
+
+    nextBreakpointID_ = 0;
 }
 
 

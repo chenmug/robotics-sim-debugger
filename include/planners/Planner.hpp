@@ -53,14 +53,14 @@ public:
      *
      * @return Number of nodes expanded.
      */
-    size_t getNodesExpanded() const;
+    size_t getNodesExpanded() const noexcept;
 
     /**
      * @brief Get the duration of the last path planning run in milliseconds.
      *
      * @return Duration in milliseconds.
      */
-    double getLastRunTimeMs() const;
+    double getLastRunTimeMs() const noexcept;
     
     // Virtual destructor for proper cleanup of derived classes
     virtual ~Planner() = default;

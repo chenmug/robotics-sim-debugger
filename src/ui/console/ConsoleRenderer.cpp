@@ -100,8 +100,6 @@ std::string robotModeToString(RobotMode mode)
 }
 
 
-
-
 // /*************** RENDER VIEW *****************/
 
 void renderView(const DebugSnapshotView& view)
@@ -219,11 +217,6 @@ void renderGrid(const DebugSnapshotView& view)
             if (cell == ".")
             {
                 for (const auto& o : grid.static_obstacles)
-                {
-                    if (o == pos) cell = "#";
-                }
-
-                for (const auto& o : state.dynamic_obstacles)
                 {
                     if (o == pos) cell = "#";
                 }

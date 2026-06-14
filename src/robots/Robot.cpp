@@ -19,9 +19,9 @@ size_t Robot::getID() const
 
 /***************** ADD SENSOR ****************/
 
-void Robot::addSensor(std::shared_ptr<Sensor> sensor) 
+void Robot::addSensor(std::unique_ptr<Sensor> sensor) 
 { 
-    sensors_.push_back(sensor); 
+    sensors_.push_back(std::move(sensor)); 
 }
 
 

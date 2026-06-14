@@ -49,7 +49,7 @@ void SimulationEngine::runTick()
         robot->plan(current_state);
     }
 
-    conflictResolver_->resolve(current_state, grid_);
+    conflictResolver_.resolve(current_state, grid_);
 
     for (auto& robot : robots)
     {

@@ -1,4 +1,5 @@
 #include "sensors/ObstacleSensor.hpp"
+#include "core/GridConfig.hpp"
 #include <cmath>  // For std::sqrt
 
 
@@ -26,12 +27,6 @@ SensorData ObstacleSensor::read(const SimulationState& state, const GridConfig& 
     for (const auto& obst : grid.static_obstacles) 
     {
         addObstacleIfInRange(obst, pos, data);
-    }
-
-    // Dynamic obstacles
-    for (const auto& dyn : state.dynamic_obstacles) 
-    {
-        addObstacleIfInRange(dyn, pos, data);
     }
 
     // Other robots

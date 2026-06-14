@@ -1,6 +1,7 @@
 #include <gtest/gtest.h>
 #include "planners/AStarPlanner.hpp"
 #include "core/SimulationState.hpp"
+#include "core/GridConfig.hpp" 
 
 
 /**
@@ -13,7 +14,6 @@
  * - Optimality (Manhattan distance)
  * - Multiple equal-length paths
  * - Start/goal outside the grid
- * - Dynamic obstacles
  * - Heuristic correctness
  */
 
@@ -109,7 +109,7 @@ TEST(AStarPlanner, ChoosesOptimalPathAmongEquals)
     int expectedLength = 4;
 
     // Obstacles to create multiple shortest paths of same length
-    state.dynamic_obstacles.push_back({1,1}); 
+    grid.static_obstacles.push_back({1,1}); 
     auto path = planner.computePath(state, robot, grid);
 
     EXPECT_EQ(path.size()-1, expectedLength);
@@ -138,7 +138,7 @@ TEST(AStarPlanner, StartOrGoalOutsideGrid)
 }
 
 
-TEST(AStarPlanner, DynamicObstacleChangesPath)
+TEST(AStarPlanner, StaticObstacleChangesPath)
 {
     AStarPlanner planner;
     SimulationState state;
@@ -153,7 +153,7 @@ TEST(AStarPlanner, DynamicObstacleChangesPath)
     EXPECT_EQ(path1.back(), robot.goal);
 
     // Add obstacle blocking direct path
-    state.dynamic_obstacles.push_back({2,0});
+    grid.static_obstacles.push_back({2,0});
     auto path2 = planner.computePath(state, robot, grid);
 
     EXPECT_GT(path2.size(), path1.size());  // new path longer

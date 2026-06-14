@@ -1,4 +1,5 @@
 #include "sensors/GoalSensor.hpp"
+#include "core/GridConfig.hpp"
 
 
 /******************* READ *******************/

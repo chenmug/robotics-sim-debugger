@@ -73,7 +73,6 @@ TEST(ConflictResolver, RepeatedConflictOneMovesAside)
     state.robots[1].nextPlannedPos = {0,0};
     resolver.resolve(state, grid);
 
-    // simulate carry-over
     for (auto& r : state.robots)
     {
         r.wasBlocked = r.blockedNow;

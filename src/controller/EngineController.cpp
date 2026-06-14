@@ -10,7 +10,12 @@
 // /*************** CONSTRUCTOR *****************/
 
 EngineController::EngineController(SimulationEngine& engine, SnapshotManager& snapshotManager)
-    : engine_(engine), snapshot_(snapshotManager)
+    : engine_(engine), snapshot_(snapshotManager) {}
+
+
+// /****************** START ********************/
+
+void EngineController::start()
 {
     simulationThread_ = std::thread(&EngineController::simulationLoop, this);
 }
@@ -59,7 +64,7 @@ void EngineController::simulationLoop()
         engine_.runTick();
         lock.lock();
 
-        syncToTick(engine_.getCurrentState().tick);
+        applyTick(engine_.getCurrentState().tick);
 
         if (engine_.allRobotsReached())
         {
@@ -113,9 +118,6 @@ void EngineController::pause()
 {
     std::lock_guard<std::mutex> lock(mtx_);
     isRunning_ = false;
-
-    size_t lastTick = snapshot_.getSize() - 1;
-    syncToTick(lastTick);
 }
 
 
@@ -127,9 +129,10 @@ void EngineController::stepForward()
     isRunning_ = false;
 
     size_t nextTick = engine_.getCurrentState().tick + 1;
+
     if (nextTick < snapshot_.getSize())
     {
-        syncToTick(nextTick);
+        applyTick(nextTick);
     }
     else
     {
@@ -137,7 +140,7 @@ void EngineController::stepForward()
         engine_.runTick();
         lock.lock();
 
-        syncToTick(nextTick);
+        applyTick(nextTick);
     }
 
     cv_.notify_all();
@@ -159,7 +162,8 @@ void EngineController::stepBack()
     }
 
     size_t newTick = currentTick - 1;
-    syncToTick(newTick);
+
+    applyTick(newTick);
 
     snapshot_.removeFutureSnapshots(newTick + 1);
 
@@ -173,6 +177,15 @@ void EngineController::updateGUI()
 {
     DebugSnapshotView view = buildDebugView();
     renderView(view);
+}
+
+
+// /**************** APPLY TICK ****************/
+
+void EngineController::applyTick(size_t tick)
+{
+    syncToTick(tick);
+    updateGUI();
 }
 
 
@@ -228,7 +241,7 @@ BreakpointManager& EngineController::getBreakpointManager()
 void EngineController::syncToTick(size_t tick)
 {
     const SimulationState* state = snapshot_.get(tick);
-    if (!state) 
+    if (!state)
     {
         return;
     }
@@ -236,8 +249,6 @@ void EngineController::syncToTick(size_t tick)
     SimulationState synced = *state;
     synced.tick = tick;
     engine_.setCurrentState(synced);
-
-    updateGUI();
 }
 
 
@@ -259,9 +270,8 @@ bool EngineController::jumpToTick(size_t targetTick)
 
     if (targetTick < snapshot_.getSize())
     {
-        syncToTick(targetTick);
+        applyTick(targetTick);
         snapshot_.removeFutureSnapshots(targetTick + 1);
-
         return true;
     }
 
@@ -279,7 +289,7 @@ bool EngineController::jumpToTick(size_t targetTick)
             snapshot_.save(engine_.getCurrentState());
         }
 
-        syncToTick(tick);
+        applyTick(tick);
 
         if (checkBreakpoints())
         {
@@ -287,7 +297,7 @@ bool EngineController::jumpToTick(size_t targetTick)
         }
     }
 
-    syncToTick(engine_.getCurrentState().tick);
+    applyTick(engine_.getCurrentState().tick);
 
     return true;
 }
@@ -303,11 +313,11 @@ DebugSnapshotView EngineController::buildDebugView()
     const SimulationState* state = snapshot_.get(tick);
     if (!state)
     {
-        return view; 
+        return view;
     }
 
     view.tick = state->tick;
-    view.state = state;  
+    view.state = state;
     view.grid = &engine_.getGridConfig();
     view.selectedRobotId = selectedRobotId_;
     view.isRunning = isRunning_;
@@ -360,8 +370,11 @@ std::vector<RobotDebugInfo> EngineController::collectRobotDebugInfo() const
 
 void EngineController::setSelectedRobot(int id)
 {
-    std::lock_guard<std::mutex> lock(mtx_);
-    selectedRobotId_ = id;
+    {
+        std::lock_guard<std::mutex> lock(mtx_);
+        selectedRobotId_ = id;
+    }
+
     updateGUI();
 }
 

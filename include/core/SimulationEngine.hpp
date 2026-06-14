@@ -19,11 +19,11 @@
 class SimulationEngine 
 {
 private:
-    SimulationState current_state;                        // Current simulation state
-    GridConfig grid_;                                     // Grid configuration
-    std::vector<std::unique_ptr<Robot>> robots;           // All robots in the simulation
-    SnapshotManager snapshotManager_;                     // Stores snapshots for debugging / replay
-    std::unique_ptr<ConflictResolver> conflictResolver_;  // Resolve conflicts between the robots
+    SimulationState current_state;                // Current simulation state
+    GridConfig grid_;                             // Grid configuration
+    std::vector<std::unique_ptr<Robot>> robots;   // All robots in the simulation
+    SnapshotManager snapshotManager_;             // Stores snapshots for debugging / replay
+    ConflictResolver conflictResolver_;           // Resolve conflicts between the robots
 
 public:
     /**

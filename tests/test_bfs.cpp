@@ -12,7 +12,6 @@
  * - No path scenarios (blocked goal)
  * - Optimality (shortest path in steps)
  * - Multiple equal-length paths
- * - Dynamic obstacles
  * - Start/goal outside grid
  */
 
@@ -129,7 +128,7 @@ TEST(BFSPlanner, StartOrGoalOutsideGrid)
 }
 
 
-TEST(BFSPlanner, DynamicObstacleChangesPath)
+TEST(BFSPlanner, StaticObstacleChangesPath)
 {
     BFSPlanner planner;
     SimulationState state;
@@ -144,7 +143,7 @@ TEST(BFSPlanner, DynamicObstacleChangesPath)
     EXPECT_EQ(path1.back(), robot.goal);
 
     // Add obstacle blocking direct path
-    state.dynamic_obstacles.push_back({2,0});
+    grid.static_obstacles.push_back({2,0});
     auto path2 = planner.computePath(state, robot, grid);
 
     EXPECT_GT(path2.size(), path1.size());  // new path is longer

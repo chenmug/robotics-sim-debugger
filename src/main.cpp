@@ -48,6 +48,7 @@ int main()
     // Engine controller
     // ---------------------------
     EngineController controller(engine, engine.getSnapshotManager());
+    controller.start();
 
     // ---------------------------
     // ADD BREAKPOINTS

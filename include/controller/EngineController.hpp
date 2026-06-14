@@ -3,7 +3,6 @@
 #include "core/SnapshotManager.hpp"          // Forward Declaration
 #include "controller/BreakpointManager.hpp"  // Forward Declaration
 #include "ui/debug/DebugSnapshotView.hpp"    // Forward Declaration
-#include <atomic>                            // For std::atomic
 #include <thread>                            // For std::thread
 #include <mutex>                             // For std::mutex
 #include <condition_variable>                // For std::condition_variable
@@ -25,8 +24,8 @@ private:
     SimulationEngine& engine_;    // The simulation engine
     SnapshotManager& snapshot_;   // The snapshot manager (access via EngineController)
 
-    std::atomic<bool> isRunning_ = false;      // Indicates whether the simulation is currently advancing automatically.
-    std::atomic<bool> quitRequested_ = false;  // Signals the simulation thread to terminate.
+    bool isRunning_ = false;      // Indicates whether the simulation is currently advancing automatically.
+    bool quitRequested_ = false;  // Signals the simulation thread to terminate.
     std::thread simulationThread_;             // Background thread responsible for advancing simulation ticks.
 
     mutable std::mutex mtx_;      // Mutex for synchronizing access to shared resources.
@@ -52,6 +51,17 @@ public:
      * is destroyed by signaling quitRequested_ and joining the thread.
      */
     ~EngineController();
+
+    /**
+     * Starts the simulation thread.
+     *
+     * This function launches the background simulation loop that advances
+     * the engine state over time.
+     *
+     * It must be called only after the EngineController has been fully
+     * constructed and configured (e.g. breakpoints, initial state).
+     */
+    void start();
 
     /**
      * @brief Returns the current tick count of the simulation.
@@ -188,4 +198,18 @@ private:
      *         about each robot's planner and state.
      */
     std::vector<RobotDebugInfo> collectRobotDebugInfo() const;
+
+    /**
+     * @brief Applies a simulation tick and updates the UI accordingly.
+     *
+     * This function is the single entry point for advancing or reverting
+     * the simulation view to a specific tick.
+     *
+     * It performs two actions in a fixed order:
+     * 1. Synchronizes the SimulationEngine state to the given tick.
+     * 2. Updates the GUI to reflect the new state.
+     *
+     * @param tick The simulation tick to apply.
+     */
+    void applyTick(size_t tick);
 };

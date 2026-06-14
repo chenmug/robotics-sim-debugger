@@ -17,15 +17,6 @@ bool Planner::isBlocked(const Position& pos, const SimulationState& state,
         }
     }
 
-    // Check dynamic obstacles
-    for (const auto& dObst : state.dynamic_obstacles)
-    {
-        if (dObst == pos)
-        {
-            return true;
-        }
-    }
-
     // Check robots
     for (const auto& other : state.robots)
     {
@@ -74,7 +65,14 @@ std::vector<Position> Planner::reconstructPath(const std::unordered_map<size_t, 
     while (node != start)
     {
         path.push_back(node);
-        node = cameFrom.at(hashPos(node, grid));
+
+        auto it = cameFrom.find(hashPos(node, grid));
+        if (it == cameFrom.end())
+        {
+            return {};
+        }
+
+        node = it->second;
     }
 
     path.push_back(start);
@@ -86,7 +84,7 @@ std::vector<Position> Planner::reconstructPath(const std::unordered_map<size_t, 
 
 /************ GET NODE EXPANDED ************/
 
-size_t Planner::getNodesExpanded() const 
+size_t Planner::getNodesExpanded() const noexcept
 { 
     return lastNodesExpanded_; 
 }
@@ -94,7 +92,7 @@ size_t Planner::getNodesExpanded() const
 
 /************* GET LAST RUN TIMES ************/
 
-double Planner::getLastRunTimeMs() const 
+double Planner::getLastRunTimeMs() const noexcept
 { 
     return lastRunTimeMs_; 
 }

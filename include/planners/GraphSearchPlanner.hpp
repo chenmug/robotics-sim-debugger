@@ -1,11 +1,11 @@
 #pragma once
 #include "core/SimulationState.hpp"   // Forward Declaration
-#include "core/SimulationEngine.hpp"  // For GridConfig
 #include "planners/Planner.hpp"       // Forward Declaration
 #include <unordered_map>              // For std::unordered_map
 #include <vector>                     // For std::vecctor
 #include <cstddef>                    // For size_t
 
+struct GridConfig;
 
 /**
  * @brief Graph-based path planner for grid-based robots.

@@ -9,9 +9,9 @@ void ConflictResolver::resolve(SimulationState& state, const GridConfig& grid)
 {
     size_t n = state.robots.size();
 
-    resetBlockedNow(state);                 // Handle conflicts between all robot pairs
-    detectAndHandleConflicts(state, grid);  // Update wasBlocked status
-    updateBlockedStates(state);
+    resetBlockedNow(state);                 
+    detectAndHandleConflicts(state, grid);  // Handle conflicts between all robot pairs
+    updateBlockedStates(state);             // Update wasBlocked status
 }
 
 
@@ -129,6 +129,11 @@ Position ConflictResolver::findFreeNeighbor(const SimulationState& state,
         Position candidate{robot.position.x + d.x,robot.position.y + d.y};
 
         if (!grid.isWithinBounds(candidate))
+        {
+            continue;
+        }
+
+        if (grid.isObstacle(candidate))
         {
             continue;
         }
