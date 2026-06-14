@@ -114,13 +114,11 @@ struct RobotState
  * The state includes:
  * - the current simulation tick
  * - the state of all robots
- * - positions of dynamic obstacles
  * - events that occurred during this tick
  */
 struct SimulationState 
 {
-    size_t tick = 0;                         // Current simulation tick
-    std::vector<RobotState> robots;          // List of all robots in the simulation
-    std::vector<Position> dynamic_obstacles; // Positions of moving obstacles
-    std::vector<Event> events;               // Events generated during the tick
+    size_t tick = 0;                 // Current simulation tick
+    std::vector<RobotState> robots;  // List of all robots in the simulation
+    std::vector<Event> events;       // Events generated during the tick
 };

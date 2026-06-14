@@ -1,4 +1,5 @@
 #include "planners/GraphSearchPlanner.hpp"
+#include "core/GridConfig.hpp" 
 #include <queue>   // For priority_queue
 #include <chrono>  // For timing
 

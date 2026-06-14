@@ -98,4 +98,16 @@ public:
      * @return Const reference to the vector of breakpoints.
      */
     const std::vector<std::unique_ptr<Breakpoint>>& getBreakpoints() const;
+
+private:
+    /**
+     * @brief Allocate a unique breakpoint ID.
+     *
+     * Reuses IDs from previously removed breakpoints whenever possible.
+     * If no recycled IDs are available, a new ID is generated using
+     * the internal counter.
+     *
+     * @return A unique breakpoint ID.
+     */
+    size_t allocateID();
 };

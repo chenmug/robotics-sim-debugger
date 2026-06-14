@@ -1,6 +1,7 @@
 #pragma once
-#include "Sensor.hpp"                 // Forward Declaration
-#include "core/SimulationEngine.hpp"  // Forward Declaration
+#include "Sensor.hpp"  // Forward Declaration
+
+struct GridConfig;     // Forward Declaration 
 
 /**
  * @brief Sensor that detects obstacles around the robot.

@@ -12,7 +12,7 @@
  */
 class Breakpoint
 {
-protected:
+private:
 
     size_t breakpointID_;  // Unique ID for this breakpoint
 
@@ -48,5 +48,5 @@ public:
     /**
      * @brief Get the unique ID of this breakpoint.
      */
-    size_t getID() const { return breakpointID_; }
+    size_t getID() const noexcept { return breakpointID_; }
 };

@@ -8,22 +8,13 @@
 std::vector<Position> BFSPlanner::computePath(const SimulationState& state,
                                     const RobotState& robot, const GridConfig& grid) 
 {
-    std::queue<Position> openQueue;
-
-    // Map to reconstruct path (key: hashed position, value: parent position)
-    std::unordered_map<size_t, Position> cameFrom;
-
-    // Track visited positions to avoid revisiting
-    std::unordered_map<size_t, bool> visited;
-
     using Clock = std::chrono::high_resolution_clock;
     auto startTime = Clock::now();
 
     lastNodesExpanded_ = 0; // Reset counter
-    Position start = robot.position;
-    Position goal  = robot.goal;
-
-    size_t nHash = 0;
+    
+    const Position start = robot.position;
+    const Position goal  = robot.goal;
 
     // Check if start and goal is within bounds
     if (!grid.isWithinBounds(start) || !grid.isWithinBounds(goal))
@@ -31,8 +22,25 @@ std::vector<Position> BFSPlanner::computePath(const SimulationState& state,
         return {};
     }
 
+    if (start == goal)
+    {
+        lastRunTimeMs_ = 0.0;
+        return {start};
+    }
+
+    const size_t gridSize = grid.width * grid.height;
+    const size_t hashStart = hashPos(start, grid);
+
+    std::queue<Position> openQueue;
+
+    // Map to reconstruct path (key: hashed position, value: parent position)
+    std::unordered_map<size_t, Position> cameFrom;
+
+    // Track visited positions to avoid revisiting
+    std::vector<bool> visited(gridSize, false);;
+
     openQueue.push(start);
-    visited[hashPos(start, grid)] = true;
+    visited[hashStart] = true;
 
     while (!openQueue.empty())
     {
@@ -58,7 +66,7 @@ std::vector<Position> BFSPlanner::computePath(const SimulationState& state,
                 continue;
             }
 
-            nHash = hashPos(neighbor, grid);
+            const size_t nHash = hashPos(neighbor, grid);
             if (!visited[nHash])
             {
                 visited[nHash] = true;

@@ -10,9 +10,9 @@
  */
 struct GridConfig 
 {
-    int width;                              // Width of the grid
-    int height;                             // Height of the grid
-    std::vector<Position> static_obstacles; // Positions of obstacles that cannot move
+    int width = 0;                           // Width of the grid
+    int height = 0;                          // Height of the grid
+    std::vector<Position> static_obstacles;  // Positions of obstacles that cannot move
 
     /**
      * @brief Checks whether a given position lies within the grid boundaries.
@@ -36,5 +36,25 @@ struct GridConfig
         static const std::vector<Position> directions = {{0,1}, {1,0}, {0,-1}, {-1,0}};
 
         return directions;
+    }
+
+    /**
+     * @brief Checks whether a given position contains a static obstacle.
+     *
+     * @param pos The position to validate.
+     * 
+     * @return True if the position is occupied by a static obstacle, false otherwise.
+     */
+    bool isObstacle(const Position& pos) const
+    {
+        for (const auto& obstacle : static_obstacles)
+        {
+            if (obstacle == pos)
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 };

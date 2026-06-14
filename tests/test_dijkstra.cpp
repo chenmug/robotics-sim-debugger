@@ -1,6 +1,7 @@
 #include <gtest/gtest.h>
 #include "planners/DijkstraPlanner.hpp"
 #include "core/SimulationState.hpp"
+#include "core/GridConfig.hpp" 
 
 
 /**
@@ -11,7 +12,6 @@
  * - Edge cases (start == goal)
  * - No path scenarios (blocked goal)
  * - Optimality (shortest path, uniform-cost)
- * - Dynamic obstacles
  * - Start/goal outside grid
  * - Heuristic function always returns 0
  */
@@ -131,7 +131,7 @@ TEST(DijkstraPlanner, StartOrGoalOutsideGrid)
 }
 
 
-TEST(DijkstraPlanner, DynamicObstacleChangesPath)
+TEST(DijkstraPlanner, StaticObstacleChangesPath)
 {
     DijkstraPlanner planner;
     SimulationState state;
@@ -145,7 +145,7 @@ TEST(DijkstraPlanner, DynamicObstacleChangesPath)
     EXPECT_EQ(path1.front(), robot.position);
     EXPECT_EQ(path1.back(), robot.goal);
 
-    state.dynamic_obstacles.push_back({2,0}); // block direct path
+    grid.static_obstacles.push_back({2,0}); // block direct path
     auto path2 = planner.computePath(state, robot, grid);
 
     EXPECT_GT(path2.size(), path1.size()); // new path is longer

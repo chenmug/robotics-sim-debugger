@@ -10,8 +10,7 @@
 GridRobot::GridRobot(const GridConfig& grid, std::shared_ptr<Planner> planner)
     : grid_(grid), planner_(planner)
 {
-    auto obstacleSensor = std::make_shared<ObstacleSensor>();
-    addSensor(obstacleSensor);
+    addSensor(std::make_unique<ObstacleSensor>());
 }
 
 
