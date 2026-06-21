@@ -7,29 +7,37 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 set(CMAKE_BUILD_TYPE Debug)
 
-# include directories
-include_directories(include)
-
-# source files
-file(GLOB_RECURSE SOURCES
+# =========================================================
+# Core sources
+# =========================================================
+file(GLOB_RECURSE CORE_SOURCES
     "src/core/*.cpp"
     "src/planners/*.cpp"
     "src/robots/*.cpp"
     "src/sensors/*.cpp"
     "src/controller/*.cpp"
     "src/ui/**/*.cpp"
+    "src/benchmarks/*.cpp"
 )
 
-# library with all core code
-add_library(robotics_sim_lib ${SOURCES})
+add_library(robotics_sim_lib ${CORE_SOURCES})
 
-# main executable
+target_include_directories(robotics_sim_lib PUBLIC include)
+
+# =========================================================
+# Main executable
+# =========================================================
 add_executable(robotics_sim_debugger src/main.cpp)
-
 target_link_libraries(robotics_sim_debugger robotics_sim_lib)
 
-# enable testing
-enable_testing()
+# =========================================================
+# Benchmark executable
+# =========================================================
+add_executable(robotics_benchmark src/benchmark_main.cpp)
+target_link_libraries(robotics_benchmark robotics_sim_lib)
 
-# add tests folder
+# =========================================================
+# Tests
+# =========================================================
+enable_testing()
 add_subdirectory(tests)
