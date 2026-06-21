@@ -1,373 +1,179 @@
-# Robotics Simulation Debugger
-### Personal Project — Ongoing Development
-
-### Deterministic Multi-Agent Simulation Engine with Time-Travel Debugging (C++ / Linux)
+# Robotics Simulation Debugger  
+## Deterministic Multi-Agent Engine with Time-Travel Debugging
+### C++ / Linux — Personal Project
 
 ---
 
 ## Overview
 
-Robotics Simulation Debugger is a **personal systems-oriented C++20 project** focused on building a deterministic simulation engine with advanced debugging capabilities.
+A deterministic multi-agent simulation engine built in C++20 for debugging, inspection, and reproducibility of concurrent systems.
 
-The project enables **deep inspection and reproducibility** of complex robotic systems, particularly in the presence of **concurrency and multi-agent interactions**.
+The engine supports step-by-step execution, full state replay, and time-travel debugging of multi-agent behavior in a controlled environment.
 
-Unlike traditional simulators, this system is designed as a **debuggable engine**, not just a visual tool.
+Instead of focusing on visualization, the project focuses on making the system **observable, reproducible, and easy to debug under concurrency**.
 
 ---
 
-## Why This Project Exists
+## Motivation
 
-Debugging robotics simulations is inherently difficult due to:
+Debugging concurrent systems is hard due to:
 
-- Non-deterministic behavior  
-- Concurrent execution  
+- Non-deterministic execution order  
+- Race conditions in shared state  
 - Complex interactions between multiple agents  
 
-This project explores how to transform a simulation into a **deterministic, inspectable system**, enabling:
-
-- Reproducible execution  
-- Time-travel debugging (forward/backward stepping)  
-- Controlled analysis of system behavior  
-
----
-
-## Key Capabilities
+This project explores how to turn such a system into a fully reproducible simulation engine that allows:
 
 - Deterministic execution  
-- Snapshot-based state management  
-- Time-travel debugging (step forward/backward)  
-- Multi-threaded simulation architecture  
-- Multi-agent coordination with conflict resolution  
-- Modular robotics framework  
-- Performance Benchmarking: Ability to measure and print various performance metrics, including planner execution time and nodes expanded.
+- Replay of past runs  
+- Step-level debugging at tick granularity  
 
 ---
 
 ## Core Features
 
 ### Deterministic Simulation Engine
-
-- Fixed tick-based simulation loop  
-- Fully reproducible execution from initial state  
-- Clear separation between simulation state and observers  
+- Tick-based execution model  
+- Fully reproducible runs from the same initial state  
+- Clear separation between simulation state and execution logic  
 
 ---
 
-### Time-Travel Debugging (Core Capability)
+### Time-Travel Debugging
+- Snapshot of the full simulation state at every tick  
+- Step forward and backward through execution history  
+- Breakpoints based on ticks or state conditions  
+- Replay and inspect past states  
 
-- Snapshot of simulation state stored at every tick  
-- Enables:
-  - Step forward  
-  - Step backward  
-  - Replay from initial state 
-  - Jump to arbitrary tick
+---
 
-This allows debugging not only the current state, but also **past system behavior**.
+### Multi-Agent System
+- Multiple robots running in a shared grid  
+- Each agent plans independently  
+- Built-in conflict resolution for simultaneous actions  
 
 ---
 
 ### Multi-Threaded Architecture
-
-- Dedicated simulation thread  
-- Console / future GUI operate on snapshots only  
-- Synchronization via `std::mutex` and `std::condition_variable`  
-
-Guarantees:
-
-- No external mutation of simulation state  
-- Thread-safe access  
-- Preservation of deterministic behavior  
+- Simulation runs in a dedicated thread, separate from the control interface  
+- Uses `std::mutex` and `std::condition_variable` for synchronization  
+- Snapshot-based state access ensures deterministic behavior  
 
 ---
 
-### Multi-Agent Simulation & Coordination
-
-- Multiple robots operate concurrently in a shared grid  
-- Each robot plans independently using:
-  - A*  
-  - Dijkstra  
-  - BFS  
-
-#### Conflict Resolution
-
-- Priority-based coordination mechanism  
-- When conflicts occur:
-  - Higher-priority robot proceeds  
-  - Lower-priority robot waits or replans  
-
-#### Challenges Addressed
-
-- Coordinating independent agents in shared mutable state  
-- Preventing inconsistent updates  
-- Maintaining determinism under concurrency  
+### Conflict Resolution
+- Priority-based ordering of actions  
+- Deterministic handling of collisions and conflicts  
+- Guarantees consistent results across runs  
 
 ---
 
-### Modular Robotics Framework
-
-#### Robot Abstraction
-
-- Sense -> Plan -> Act pipeline  
-- `GridRobot` as a concrete implementation  
-
-```cpp
-class Robot
-{
-protected:
-    size_t id_ = 0;  // unique robot identifier
-
-public:
-    virtual void sense(const SimulationState& state) = 0;
-    virtual void plan(const SimulationState& state) = 0;
-    virtual void act(SimulationState& state) = 0;
-
-    virtual ~Robot() = default;
-};
-```
-
-**Note:** This is a **partial interface**. Additional functions and internal members exist in the full implementation.
-
-
-### Planner Strategy Pattern
-
-Path planners implement the Strategy Pattern  
-Planners compute paths without modifying simulation state  
-
-```cpp
-class Planner 
-{
-public:
-    virtual std::vector<Position> computePath(
-        const SimulationState& state,
-        const RobotState& robot,
-        const GridConfig& grid) = 0;
-
-    virtual ~Planner() = default;
-};
-```
----
-
-### Grid-Based Simulation
-
-- Static and dynamic obstacles  
-- Robot positions and goals  
-- 4-directional movement (up/down/left/right)  
-- Real-time console rendering  
+### Modular Design
+- Robot abstraction (sense → plan → act)  
+- Pluggable path-planning algorithms  
+- Decoupled simulation core  
 
 ---
 
-### Console Debugger
+## Path Planning (Pluggable)
 
-Commands:
+Implemented algorithms:
 
-- `n` - step forward  
-- `b` - step backward  
-- `r` - run continuously  
-- `p` - pause  
-- `j` - jump to specific chosen tick
-- `s` - select a specific robot
-- `q` - quit  
+- BFS  
+- Dijkstra  
+- A*  
 
-Each command operates on consistent snapshots, ensuring reliable navigation through simulation time.
+All used interchangeably within the same engine.
 
 ---
 
-## Debugging Capabilities
+## Grid Simulation
 
-- Tick-based breakpoints  
-- State-based breakpoints  
-- Event-based triggers  
-
-Example:
-
-- break at tick = 100  
-- break when robot.state == REPLANNING  
-- break on ObstacleDetected  
+- 4-direction movement (up, down, left, right)  
+- Random obstacle generation  
+- Start/goal validation to ensure solvable grids  
+- Deterministic environment generation  
 
 ---
 
-## Simulation Tick Flow
+## Debug Interface (Console)
 
-Each simulation tick executes the following steps:
-
-1. All robots perform `sense()`
-2. Each robot computes a plan using its planner
-3. Conflict resolution is applied
-4. Actions are committed to the simulation state
-5. A snapshot is stored
-
-This guarantees:
-- Deterministic ordering
-- Consistent state transitions  
+- Step forward / backward  
+- Pause / resume execution  
+- Jump to any tick  
+- Inspect robots and simulation state  
 
 ---
 
-## Performance Benchmarking
+## Execution Model
 
-Performance metrics:
+Each simulation tick:
 
-- Tick execution time (ms)  
-- Planner computation time  
-- Number of processed actions per tick  
-- Pathfinding complexity (e.g., nodes expanded)  
-- Planner execution time per robot
+1. Robots sense the environment  
+2. Planners compute actions  
+3. Conflicts are resolved  
+4. Actions are applied  
+5. A snapshot is saved  
 
----
-
-## GUI (Planned)
-
-- Dear ImGui + SDL2  
-- Simulation control panel  
-- Grid visualization  
-- Robot inspector  
-- Event log  
-- Timeline slider  
-- Breakpoint management UI  
-
-> The current console renderer is a temporary debugging interface and is intentionally decoupled from the simulation core to allow future replacement with a full graphical frontend.
+This ensures deterministic execution and consistent state transitions.
 
 ---
 
-## Architecture Overview
+## Architecture
 
-```
-GUI Layer (planned)
-   ↓
+```text
 Engine Controller
-   ↓
-Core Simulation Engine
-   ├── Robots
-   ├── Planners
-   ├── Sensors
-   ├── Snapshot Manager
-   └── Simulation Loop
+      ↓
+Deterministic Simulation Engine
+      ↓
+Simulation Core
+├── Simulation Loop
+├── Robots
+├── Planners
+├── Snapshot Manager
+└── Conflict Resolution
 ```
 
-GUI interacts only through Engine Controller  
-Core engine independently testable  
-SnapshotManager ensures deterministic replay  
+The engine is fully decoupled from any UI layer and designed for testability and reproducibility. 
 
 ---
 
 ## Design Principles
 
-- Determinism first – reproducibility is a core requirement  
-- Separation of concerns – simulation vs control vs presentation  
-- Immutability for safety – snapshots instead of shared mutation  
-- Modularity – interchangeable planners and robot behaviors  
+- Determinism as a core requirement
+- Clear separation between simulation and control logic
+- Snapshot-based state instead of shared mutable state
+- Modular and extensible architecture
 
 ---
 
-## Design Patterns
+## Tech Stack
 
-- **Strategy Pattern** – path planning algorithms  
-- **State Machine** – robot lifecycle  
-- **Factory Pattern** – robot / planner creation  
-- **RAII** – safe resource management  
-
----
-
-## Memory Management
-
-- `std::unique_ptr` for ownership  
-- `std::shared_ptr` where shared lifetime is required  
-- No raw owning pointers  
-- Thread-safe state access via controlled interfaces  
+- C++20
+- Linux
+- Multithreading (mutex, condition_variable)
+- GoogleTest
+- Graph algorithms
 
 ---
 
-## Project Structure
+## Performance Benchmarking (Secondary Feature)
 
-```
-robotics-sim-debugger/
-│
-├── include/
-│   ├── core/
-│   ├── robots/
-│   ├── planners/
-│   ├── controller/
-|   └── ui/
-|       ├── console/
-|       └── debug/
-│
-├── src/
-│   ├── core/
-│   ├── robots/
-│   ├── planners/
-│   ├── controller/
-|   └── ui/
-|       ├── console/
-│
-├── gui/ (planned)
-└── tests/
-```
+A benchmarking module evaluates path-planning algorithms under different grid configurations.
+
+- Grid sizes: up to 80×80
+- Obstacle density: 10%–30%
+- Multiple randomized runs per configuration
+
+Metrics:
+- Nodes expanded
+- Execution time
+
+Average results showed ~60% reduction in node expansions for A* compared to BFS and Dijkstra.
 
 ---
 
-## Build Instructions (Linux)
+## Future Work
 
-Requirements:
-
-* C++20 compatible compiler
-* CMake ≥ 3.16
-
-Build:
-
-```bash
-mkdir build
-cd build
-cmake ..
-make
-```
-
-Run:
-
-```bash
-./robotics_sim_debugger
-```
-
-Run tests:
-
-```bash
-ctest
-```
-
----
-
-## Testing Strategy
-
-- Unit tests (GoogleTest)  
-- Snapshot consistency validation  
-- Step forward/backward correctness  
-- Deterministic execution verification
-- Breakpoint behavior validation    
-
----
-
-## Current Status
-
-- Deterministic simulation loop   
-- Snapshot-based step forward/backward   
-- Multi-agent coordination  
-- Console debugger  
-- Breakpoint syste
-- Benchmarking
-- GUI console   
-
-In progress:
-
-- GUI (Dear ImGui + SDL2)  
-- Performance instrumentation  
-
----
-
-## Motivation
-
-This project focuses on core systems engineering challenges, including:
-
-- Concurrency  
-- Determinism  
-- Debugging complex systems  
-- Modular architecture  
-
-The goal is to build a robust, inspectable simulation engine, rather than a graphics-heavy application.
+- Optional GUI visualization (Dear ImGui)
+- Extended debugging events system
