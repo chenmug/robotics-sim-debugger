@@ -118,6 +118,9 @@ void EngineController::pause()
 {
     std::lock_guard<std::mutex> lock(mtx_);
     isRunning_ = false;
+
+    size_t lastTick = snapshot_.getSize() - 1;
+    applyTick(lastTick);
 }
 
 
