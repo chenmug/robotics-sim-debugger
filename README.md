@@ -237,7 +237,7 @@ Metrics:
 
 ### Benchmark results:
 
-- ~60% reduction in node expansions for A* compared to BFS and Dijkstra.
+- ~62% reduction in node expansions for A* compared to BFS and Dijkstra.
 - Consistently lower execution time across all tested configurations.
 
 ---
