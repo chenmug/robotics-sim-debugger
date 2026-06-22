@@ -1,6 +1,7 @@
 # Robotics Simulation Debugger  
-## Deterministic Multi-Agent Engine with Time-Travel Debugging
-### C++ / Linux — Personal Project
+### C++ / Linux - Personal Project  
+
+Deterministic multi-agent simulation engine with time-travel debugging
 
 ---
 
@@ -11,6 +12,24 @@ A deterministic multi-agent simulation engine built in C++20 for debugging, insp
 The engine supports step-by-step execution, full state replay, and time-travel debugging of multi-agent behavior in a controlled environment.
 
 Instead of focusing on visualization, the project focuses on making the system **observable, reproducible, and easy to debug under concurrency**.
+
+---
+
+## Key Highlights
+
+- Deterministic execution with full replay capability
+- Snapshot-based time-travel debugging
+- Multi-agent grid simulation with conflict resolution
+- Pluggable path-planning algorithms (BFS, Dijkstra, A*)
+- Benchmarking for performance evaluation
+
+---
+
+### System Guarantees
+
+- Deterministic replay from any saved snapshot
+- Identical inputs always produce identical execution traces
+- No shared mutable state between simulation components
 
 ---
 
@@ -75,7 +94,7 @@ This project explores how to turn such a system into a fully reproducible simula
 
 ---
 
-## Path Planning (Pluggable)
+## Path Planning
 
 Implemented algorithms:
 
@@ -115,7 +134,7 @@ Each simulation tick:
 4. Actions are applied  
 5. A snapshot is saved  
 
-This ensures deterministic execution and consistent state transitions.
+This pipeline guarantees deterministic execution and reproducible state transitions.
 
 ---
 
@@ -157,6 +176,53 @@ The engine is fully decoupled from any UI layer and designed for testability and
 
 ---
 
+## Testing Strategy
+
+The system is validated for deterministic behavior and correctness of time-travel execution
+
+- Unit tests (GoogleTest) for core modules
+- Snapshot-based consistency validation across ticks
+- Verification of backward/forward replay correctness
+- Breakpoint and event-trigger correctness validation
+
+---
+
+## Build Instructions (Linux)
+
+### Requirements
+
+- C++20 compatible compiler
+- CMake ≥ 3.16
+
+### Build
+
+```bash
+mkdir build
+cd build
+cmake ..
+make
+```
+
+### Run simulation:
+
+```bash
+./robotics_sim_debugger
+```
+
+### Run benchmark:
+
+```bash
+./robotics_benchmark
+```
+
+### Run tests:
+
+```bash
+ctest
+```
+
+---
+
 ## Performance Benchmarking (Secondary Feature)
 
 A benchmarking module evaluates path-planning algorithms under different grid configurations.
@@ -169,11 +235,15 @@ Metrics:
 - Nodes expanded
 - Execution time
 
-Average results showed ~60% reduction in node expansions for A* compared to BFS and Dijkstra.
+### Benchmark results:
+
+- ~60% reduction in node expansions for A* compared to BFS and Dijkstra.
+- Consistently lower execution time across all tested configurations.
 
 ---
 
 ## Future Work
 
-- Optional GUI visualization (Dear ImGui)
-- Extended debugging events system
+- GUI visualization using Dear ImGui
+- Extended event-based debugging system
+- Performance profiling and instrumentation improvements
